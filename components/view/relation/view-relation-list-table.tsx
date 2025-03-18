@@ -32,6 +32,7 @@ import { ViewRelationPagination } from "./view-relation-pagination";
 import { ChevronsUpDown, Loader2, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { nanoid } from "nanoid";
 
 enum SortOrder {
     ASC = "asc",
@@ -211,8 +212,8 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                             <TableBody>
                                 {Array.from({ length: 10 }).map((_, index) => (
                                     <TableRow key={index}>
-                                        {Array.from({ length: 5 }).map((_, index) => (
-                                            <TableCell key={index}><Skeleton className="h-4 w-full" /></TableCell>
+                                        {Array.from({ length: 5 }).map((_, secondIndex) => (
+                                            <TableCell key={`${index}-${secondIndex}`}><Skeleton className="h-4 w-full" /></TableCell>
                                         ))}
                                     </TableRow>
                                 ))}
@@ -225,7 +226,7 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                                     {metadata?.fields
                                         .filter((field: Field) => field.showInList && !hiddenColumns.has(field.field))
                                         .map((field: Field) => (
-                                            <TableHead key={field.label}>
+                                            <TableHead key={field.field}>
                                                 <div className="flex items-center space-x-2">
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -272,7 +273,7 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                             </TableHeader>
                             <TableBody>
                                 {data.map((item: any) =>
-                                    <TableRow key={item.id}>
+                                    <TableRow key={nanoid()}>
                                         {metadata?.fields?.filter(field => field.showInList && !hiddenColumns.has(field.field)).map(field => {
                                             const nestedPath = field.nestedValue || field.field;
                                             const fieldValue = getNestedValue(item, nestedPath);

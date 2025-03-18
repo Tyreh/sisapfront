@@ -12,6 +12,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import ViewListHeader from "./view-list-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import ViewListActions from "./view-list-actions";
+import { nanoid } from "nanoid";
 
 interface TableProps {
     apiUrl: string;
@@ -142,18 +143,18 @@ export default function ViewListTable({ apiUrl, config, currentPreferences }: Ta
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        {Array.from({ length: 5 }).map((_, index) => (
-                                            <TableHead key={index}>
+                                        {Array.from({ length: 5 }).map(() => (
+                                            <TableHead key={nanoid()}>
                                                 <Skeleton className="h-4 w-full" />
                                             </TableHead>
                                         ))}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {Array.from({ length: 10 }).map((_, index) => (
-                                        <TableRow key={index}>
-                                            {Array.from({ length: 5 }).map((_, index) => (
-                                                <TableCell key={index}><Skeleton className="h-4 w-full" /></TableCell>
+                                    {Array.from({ length: 10 }).map(() => (
+                                        <TableRow key={nanoid()}>
+                                            {Array.from({ length: 5 }).map(() => (
+                                                <TableCell key={nanoid()}><Skeleton className="h-4 w-full" /></TableCell>
                                             ))}
                                         </TableRow>
                                     ))}
@@ -175,7 +176,7 @@ export default function ViewListTable({ apiUrl, config, currentPreferences }: Ta
 
                                 <TableBody>
                                     {data.map((item: any) =>
-                                        <TableRow key={item.id}>
+                                        <TableRow key={nanoid()}>
                                             {config.fields.filter(field => field.showInList && !hiddenColumns.has(field.field)).map(field => {
                                                 const nestedPath = field.nestedValue || field.field;
                                                 const fieldValue = getNestedValue(item, nestedPath);

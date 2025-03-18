@@ -122,15 +122,19 @@ export default function ViewDetailLayout({ module, id, metadata, extraActions, d
                             const fieldValue = getNestedValue(data, nestedPath);
                             const redirectPath = field.redirect ? resolveRedirectPath(field.redirect, data) : null;
 
+
+
                             return (
                                 <div key={field.field} className={`col-span-1 ${field.expand ? `md:col-span-full` : ''}`}>
                                     <Label className="font-semibold">{field.label}</Label>
                                     <div className="rounded-lg px-3 py-2 bg-muted mt-2 break-words whitespace-normal min-h-10">
-                                        {redirectPath ? (
-                                            <Link className="text-primary hover:text-opacity-90 hover:underline" href={`/dashboard/${redirectPath}`}>{fieldValue}</Link>
-                                        ) : (
-                                            fieldValue
-                                        )}
+                                        {field.type === 'BOOLEAN' ?
+                                            fieldValue ? 'Si' : 'No'
+                                            : redirectPath ? (
+                                                <Link className="text-primary hover:text-opacity-90 hover:underline" href={`/dashboard/${redirectPath}`}>{fieldValue}</Link>
+                                            ) : (
+                                                fieldValue
+                                            )}
                                     </div>
                                 </div>
                             );

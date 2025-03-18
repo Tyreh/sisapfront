@@ -15,7 +15,6 @@ interface Props<T extends ZodType<any, any>> {
     defaultValues: zInfer<T>;
     module: string;
     onSubmit?: (data: zInfer<T>) => Promise<any>;
-    onUseEffect?: (form: any) => void;
     apiUrl?: string;
     children: React.ReactNode;
 }
@@ -25,7 +24,6 @@ export function FormLayout<T extends ZodType<any, any>>({
     defaultValues,
     module,
     onSubmit,
-    onUseEffect,
     apiUrl,
     children
 }: Props<T>) {
@@ -85,14 +83,6 @@ export function FormLayout<T extends ZodType<any, any>>({
         router.push(`/dashboard/${module}/${response.data.id}`);
         router.refresh();
     };
-
-    useEffect(() => {
-        if (onUseEffect) {
-            setLoading(true);
-            await onUseEffect(form);
-            setLoading(false);
-        }
-    }, [onUseEffect, form])
 
     return (
         <Form {...form}>

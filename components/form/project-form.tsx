@@ -4,19 +4,15 @@ import FormInput from "@/components/ui/form/form-input";
 import { z } from "zod";
 import FormRelation from "../ui/form/form-relation";
 import { FormLayout } from "../ui/form/form-layout";
-import FormSwitch from "../ui/form/form-switch";
 import FormTextArea from "../ui/form/form-text-area";
 import FormInputInt from "../ui/form/form-input-int";
 import FormFieldArray from "../ui/form/form-field-array";
 import { secureFetch } from "@/secure-fetch";
+import FormDatePicker from "../ui/form/form-date-picker";
+import { format } from "date-fns";
+import { FormBaseProps } from "./project-issue-form";
 
-interface Props {
-    apiUrl: string;
-    module: string;
-    data: any;
-}
-
-export function ProjectForm({ apiUrl, module, data }: Props) {
+export function ProjectForm({ apiUrl, module, data }: FormBaseProps) {
     const Schema = z.object({
         id: z.string().optional(),
         name: z.string()
@@ -39,24 +35,67 @@ export function ProjectForm({ apiUrl, module, data }: Props) {
         projectStatus: z.object({
             id: z.string(),
         }),
-        // start date
-        // end date
+        estimatedStartDate: z.date().nullable().optional(),
+        estimatedEndDate: z.date().nullable().optional(),
+        members: z.array(
+            z.object({
+                id: z.string().optional(),
+                apiUser: z.object({
+                    id: z.string().optional(),
+                }),
+                project: z.object({
+                    id: z.string().optional()
+                })
+            })
+        )
     });
 
-    // const onSubmitForm = async (data: any) => {
-    //     const response = await secureFetch(`${apiUrl}/${module}${data?.id ? `/${data.id}` : ''}`, {
-    //         method: data?.id ? 'PATCH' : 'POST',
-    //         body: JSON.stringify(data)
-    //     });
+    const onSubmit = async (values: any) => {
+        console.log(values);
 
-    //     const response = await secureFetch(`${apiUrl}/${module}${data?.id ? `/${data.id}` : ''}`, {
-    //         method: 'POST',
-    //         body: JSON.stringify(data)
-    //     });
-    // }
+        const formattedStartDate = values.estimatedStartDate
+            ? format(new Date(values.estimatedStartDate), "dd/MM/yyyy")
+            : "";
+        const formattedEndDate = values.estimatedEndDate
+            ? format(new Date(values.estimatedEndDate), "dd/MM/yyyy")
+            : "";
+
+        const response = await secureFetch(`${apiUrl}/${module}${data?.id ? `/${data.id}` : ''}`, {
+            method: data?.id ? 'PATCH' : 'POST',
+            body: JSON.stringify({
+                ...(data?.id ? { id: data.id } : {}),
+                currency: values.currency ? { id: values.currency.id } : null,
+                strategicLine: values.strategicLine ? { id: values.strategicLine.id } : null,
+                coreProcess: values.coreProcess ? { id: values.coreProcess.id } : null,
+                projectStatus: values.projectStatus ? { id: values.projectStatus.id } : null,
+                name: values.name,
+                backgroundDetails: values.backgroundDetails,
+                targetPopulationScope: values.targetPopulationScope,
+                estimatedStartDate: formattedStartDate,
+                estimatedEndDate: formattedEndDate,
+                description: values.description,
+                scope: values.scope,
+                cost: values.cost,
+            })
+        });
+
+        for (const userRole of data.roles) {
+            await secureFetch(`${apiUrl}/userRole${userRole?.id ? `/${userRole.id}` : ''}`, {
+                method: userRole?.id ? 'PATCH' : 'POST',
+                body: JSON.stringify({
+                    ...(userRole.id ? { id: userRole.id } : {}),
+                    apiUser: { id: response.data.id },
+                    role: { id: userRole.role.id }
+                })
+            });
+        }
+
+        return response;
+    }
+
 
     return (
-        <FormLayout module={module} apiUrl={apiUrl} schema={Schema} defaultValues={{
+        <FormLayout module={module} apiUrl={apiUrl} schema={Schema} onSubmit={(values) => onSubmit(values)} defaultValues={{
             id: data?.id || "",
             name: data?.name || "",
             backgroundDetails: data?.backgroundDetails || "",
@@ -68,29 +107,37 @@ export function ProjectForm({ apiUrl, module, data }: Props) {
             strategicLine: data?.strategicLine ? { id: data.strategicLine.id } : { id: "" },
             coreProcess: data?.coreProcess ? { id: data.coreProcess.id } : { id: "" },
             projectStatus: data?.projectStatus ? { id: data.projectStatus.id } : { id: "" },
+            estimatedStartDate: data?.estimatedStartDate ? new Date(data.estimatedStartDate) : undefined,
+            estimatedEndDate: data?.estimatedEndDate ? new Date(data.estimatedEndDate) : undefined,
+            members: [],
         }}>
-            <FormInput name="name" label="Nombre del proyecto" />
-            <FormTextArea name="backgroundDetails" label="Antecedentes" />
-            <FormTextArea name="targetPopulationScope" label="Grupo de población a impactar" />
-            <FormTextArea name="description" label="Descripción del proyecto" />
-            <FormTextArea name="scope" label="Alcance" />
-            <FormInputInt name="cost" label="Costo" props={{ type: "number" }} />
+            <FormInput name="name" label="Nombre del proyecto" className="col-span-full" />
+            <FormTextArea name="description" label="Descripción del proyecto" className="col-span-full" />
+            <FormTextArea name="backgroundDetails" label="Antecedentes" className="col-span-full" />
+            <FormTextArea name="targetPopulationScope" label="Grupo de población a impactar" className="col-span-full" />
+            <FormTextArea name="scope" label="Alcance" className="col-span-full" />
             <FormRelation apiUrl={apiUrl} name="currency" label="Divisa" module="currency" />
+            <FormInputInt name="cost" label="Costo" props={{ type: "number" }} />
             <FormRelation apiUrl={apiUrl} name="strategicLine" label="Línea estratégica" module="strategicLine" />
             <FormRelation apiUrl={apiUrl} name="coreProcess" label="Proceso misional" module="coreProcess" />
+            <FormDatePicker name="estimatedEndDate" label="Fecha de inicio estimada" />
+            <FormDatePicker name="estimatedStartDate" label="Fecha de finalización estimada" />
+
             <FormRelation apiUrl={apiUrl} name="projectStatus" label="Estado" module="projectStatus" />
-            {/* <FormFieldArray
+            <FormFieldArray
                 className="col-span-full"
                 name="members"
                 label="Miembros del proyecto"
-                columns={["Usuario"]}
+                columns={[]}
                 defaultItem={{
+                    id: "",
                     apiUser: { id: "" },
+                    project: { id: "" }
                 }}
                 cells={[
                     (index) => <FormRelation apiUrl={apiUrl} name={`members.${index}.apiUser`} module="apiUser" />,
                 ]}
-            /> */}
+            />
         </FormLayout>
     )
 }

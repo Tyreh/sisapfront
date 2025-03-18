@@ -25,7 +25,7 @@ const FormSwitch = <T extends FieldValues>({
     } = useController({ control, name });
 
     return (
-        <FormItem className={`flex items-center ${className}`}>
+        <FormItem className={`flex ${className} flex-col`}>
             <FormControl>
                 <div className="flex items-center space-x-2">
                     <Switch
