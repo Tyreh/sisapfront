@@ -31,7 +31,7 @@ export const DatePicker = forwardRef<
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(new Date(), "PPP", { locale: es }) : <span>Seleccionar...</span>}
+          {date ? format(date, "PPP", { locale: es }) : <span>Seleccionar...</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" ref={ref}>

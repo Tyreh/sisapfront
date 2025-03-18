@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import FormFileInput from "../ui/form/form-file-input";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { toast } from "@/hooks/use-toast";
 import { secureFetch } from "@/secure-fetch";
@@ -57,6 +57,23 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId }: FormBasePr
         mode: "onBlur",
         reValidateMode: "onBlur",
     });
+
+    useEffect(() => {
+
+        const fetchData = async () => {
+            setLoading(true);
+            const response = await secureFetch(`${apiUrl}/projectIssue/${data.id}`);
+            form.setValue('id', response.data.id);
+            form.setValue('title', response.data.name);
+            form.setValue('description', response.data.description);
+            setLoading(false);
+        }
+
+        if (data) {
+            fetchData();
+        }
+
+    }, [apiUrl, data])
 
     const onSubmit = async (data: any) => {
         setLoading(true);
@@ -133,38 +150,40 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId }: FormBasePr
                             Esta ventana te permite crear una nueva incidencia para registrar y detallar un evento relevante en el avance del proyecto.
                         </SheetDescription>
                     </SheetHeader>
-                    <div className="grid gap-4 py-4">
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormInput
-                                name="title"
-                                label="Título"
-                                className="col-span-full"
-                                description="Ingresa un título breve que describa la incidencia en el avance del proyecto."
-                            />
-                            <FormTextArea
-                                name="description"
-                                label="Descripción"
-                                className="col-span-full"
-                                description="Describe en detalle la incidencia, proporcionando información relevante sobre su impacto y contexto dentro del avance del proyecto."
-                            />
-                            <FormFileInput
-                                name="files"
-                                className="col-span-full"
-                                label="Adjuntos"
-                                description="Sube archivos en formato PDF, Word o Excel."
-                                multiple={true}
-                                maxFiles={5}
-                            />
+                    {loading ? <div>cargando...</div> :
+                        <div className="grid gap-4 py-4">
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormInput
+                                    name="title"
+                                    label="Título"
+                                    className="col-span-full"
+                                    description="Ingresa un título breve que describa la incidencia en el avance del proyecto."
+                                />
+                                <FormTextArea
+                                    name="description"
+                                    label="Descripción"
+                                    className="col-span-full"
+                                    description="Describe en detalle la incidencia, proporcionando información relevante sobre su impacto y contexto dentro del avance del proyecto."
+                                />
+                                <FormFileInput
+                                    name="files"
+                                    className="col-span-full"
+                                    label="Adjuntos"
+                                    description="Sube archivos en formato PDF, Word o Excel."
+                                    multiple={true}
+                                    maxFiles={5}
+                                />
 
-                            <SheetFooter className="col-span-full">
-                                <SheetClose asChild>
-                                    <Button type="button" variant="secondary" className="w-full my-2">Cancelar</Button>
-                                </SheetClose>
-                                <Button type="submit" className="w-full my-2">Guardar</Button>
+                                <SheetFooter className="col-span-full">
+                                    <SheetClose asChild>
+                                        <Button type="button" variant="secondary" className="w-full my-2">Cancelar</Button>
+                                    </SheetClose>
+                                    <Button type="submit" className="w-full my-2">Guardar</Button>
 
-                            </SheetFooter>
-                        </form>
-                    </div>
+                                </SheetFooter>
+                            </form>
+                        </div>
+                    }
 
                 </SheetContent>
             </Sheet>

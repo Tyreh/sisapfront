@@ -9,7 +9,7 @@ import FormInputInt from "../ui/form/form-input-int";
 import FormFieldArray from "../ui/form/form-field-array";
 import { secureFetch } from "@/secure-fetch";
 import FormDatePicker from "../ui/form/form-date-picker";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { FormBaseProps } from "./project-issue-form";
 
 export function ProjectForm({ apiUrl, module, data }: FormBaseProps) {
@@ -79,13 +79,13 @@ export function ProjectForm({ apiUrl, module, data }: FormBaseProps) {
             })
         });
 
-        for (const userRole of data.roles) {
-            await secureFetch(`${apiUrl}/userRole${userRole?.id ? `/${userRole.id}` : ''}`, {
-                method: userRole?.id ? 'PATCH' : 'POST',
+        for (const member of values.members) {
+            await secureFetch(`${apiUrl}/projectApiUser${member?.id ? `/${member.id}` : ''}`, {
+                method: member?.id ? 'PATCH' : 'POST',
                 body: JSON.stringify({
-                    ...(userRole.id ? { id: userRole.id } : {}),
-                    apiUser: { id: response.data.id },
-                    role: { id: userRole.role.id }
+                    ...(member.id ? { id: member.id } : {}),
+                    project: { id: response.data.id },
+                    apiUser: { id: member.apiUser.id }
                 })
             });
         }
@@ -107,8 +107,12 @@ export function ProjectForm({ apiUrl, module, data }: FormBaseProps) {
             strategicLine: data?.strategicLine ? { id: data.strategicLine.id } : { id: "" },
             coreProcess: data?.coreProcess ? { id: data.coreProcess.id } : { id: "" },
             projectStatus: data?.projectStatus ? { id: data.projectStatus.id } : { id: "" },
-            estimatedStartDate: data?.estimatedStartDate ? new Date(data.estimatedStartDate) : undefined,
-            estimatedEndDate: data?.estimatedEndDate ? new Date(data.estimatedEndDate) : undefined,
+            estimatedStartDate: data?.estimatedStartDate
+                ? parse(data.estimatedStartDate, "dd/MM/yyyy", new Date())
+                : null,
+            estimatedEndDate: data?.estimatedEndDate
+                ? parse(data.estimatedEndDate, "dd/MM/yyyy", new Date())
+                : null,
             members: [],
         }}>
             <FormInput name="name" label="Nombre del proyecto" className="col-span-full" />
