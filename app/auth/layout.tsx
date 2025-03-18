@@ -7,29 +7,20 @@ export default function AuthLayout({ children }: Props) {
     <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
       <div className='relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex'>
         <div className='absolute inset-0 bg-primary' />
+
         <div className='relative z-20 flex items-center text-lg font-medium'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            viewBox='0 0 24 24'
-            fill='none'
-            stroke='currentColor'
-            strokeWidth='2'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            className='mr-2 h-6 w-6'
-          >
-            <path d='M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3' />
-          </svg>
+        
           SISAP
         </div>
 
-        {/* <img
-          src={ViteLogo}
-          className='relative m-auto'
-          width={301}
-          height={60}
-          alt='Vite'
-        /> */}
+        {/* Imagen centrada en la mitad */}
+        <div className="relative z-20 flex justify-center items-center flex-grow">
+          <img
+            src="/logo.png"
+            alt="El Bosque"
+            className="w-500 h-500"
+          />
+        </div>
 
         <div className='relative z-20 mt-auto'>
           <blockquote className='space-y-2'>
