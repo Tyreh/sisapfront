@@ -16,14 +16,17 @@ import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 
-export interface FormBaseProps {
+export interface Props {
     apiUrl: string;
     module: string;
     projectId: string;
     data: any;
+    files?: any[]; // archivos asociados a esta issue
 }
 
-export function ProjectIssueForm({ apiUrl, module, data, projectId }: FormBaseProps) {
+
+
+export function ProjectIssueForm({ apiUrl, module, data, projectId, files }: Props) {
     const allowedMimeTypes = [
         "application/pdf",
         "application/msword",
@@ -31,6 +34,7 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId }: FormBasePr
         "application/vnd.ms-excel",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
+    const [sheetOpen, setSheetOpen] = useState(false);
 
     const schema = z.object({
         id: z.string().optional(),
@@ -59,7 +63,6 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId }: FormBasePr
     });
 
     useEffect(() => {
-
         const fetchData = async () => {
             setLoading(true);
             const response = await secureFetch(`${apiUrl}/projectIssue/${data.id}`);
@@ -73,7 +76,7 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId }: FormBasePr
             fetchData();
         }
 
-    }, [apiUrl, data])
+    }, [apiUrl, data, form])
 
     const onSubmit = async (data: any) => {
         setLoading(true);
@@ -110,22 +113,96 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId }: FormBasePr
 
             setLoading(false);
             return;
+        } else {
+            if (data.files && data.files.length > 0) {
+                for (const file of data.files) {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    const uploadResponse = await secureFetch(`${apiUrl}/storage/file/${response.data.id}`, {
+                        method: "POST",
+                        body: formData,
+                        disableContentType: true,
+                    });
+
+                    if (uploadResponse.status !== 200) {
+                        toast({
+                            variant: "destructive",
+                            title: "Error al subir archivo",
+                            description: `Archivo: ${file.name} — ${uploadResponse.message}`,
+                        });
+                    }
+                }
+
+            }
         }
 
-        router.push(`/dashboard/project/${projectId}`);
+        toast({
+            title: "🎉 ¡Todo listo!",
+            description: "Los cambios han sido guardados correctamente.",
+            duration: 3000
+        });
+        setSheetOpen(false);
         router.refresh();
+        router.push(`/dashboard/project/${projectId}`);
+        form.reset();
 
         setLoading(false);
     }
 
+    const handleDownload = async (filename: string) => {
+        try {
+            const blob = await secureFetch(`${apiUrl}/storage/file/${filename}`, {
+                method: "GET",
+                disableContentType: true,
+                disableJsonResponse: true
+            });
+
+      
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error al descargar",
+                description: (error as Error).message,
+            });
+        }
+    };
+
+
     return (
         <FormProvider {...form}>
-            <Sheet>
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
                     {data?.id ?
                         <Card className="hover:cursor-pointer hover:scale-95 transition-transform duration-200 h-full">
                             <CardContent className="p-2 m-2">
                                 <p className="font-semibold text-sm pb-4">{data.name}</p>
+                                <p className="text-xs">{data.description}</p>
+                                {files && files.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {files.map((file, idx) => (
+                                            <Button
+                                                key={idx}
+                                                variant="outline"
+                                                size="sm"
+                                                className="text-xs"
+                                                onClick={() => handleDownload(file.fileName)}
+                                            >
+                                                {file.originalName || file.fileName}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                )}
+
+
                                 <div className="flex items-center justify-between">
                                     <p className="text-xs text-muted-foreground">Creado el {data.createdAt}</p>
                                     <div className="flex items-center">

@@ -2,7 +2,6 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/sticky-table";
 import { Filter, ViewListTableFilters } from "@/components/view/list/view-list-table-filters";
-import { useMediaQuery } from "@react-hook/media-query";
 import React, { useEffect, useState } from "react";
 import { secureFetch } from "@/secure-fetch";
 import { getNestedValue, resolveRedirectPath } from "@/lib/utils";
@@ -15,21 +14,18 @@ import ViewListActions from "./view-list-actions";
 import { nanoid } from "nanoid";
 
 interface TableProps {
-    apiUrl: string;
     config: ViewConfigDefinition;
     currentPreferences: any;
 }
 
 export interface ViewConfigField {
-    field: string;
-    nestedValue: string;
-    showInList: boolean;
+    name: string;
     label: string;
-    showInDetail: boolean;
     type: string;
     redirect?: string;
     sortable: boolean;
     sortKey?: string;
+    nestedField: string;
 }
 
 export interface ViewConfigEntity {
@@ -43,18 +39,6 @@ export interface ViewConfigDefinition {
     entity: ViewConfigEntity;
     module: string;
     fields: ViewConfigField[];
-}
-
-function renderColumnValue(column: ViewConfigField, value: any) {
-    switch (column.type) {
-        case 'IMAGE':
-            return <img src={value} alt="Imagen" width="50" />;
-        case 'CURRENCY':
-            // return `$${value.toFixed(2)}`;
-            return `$${value}`;
-        default:
-            return value;
-    }
 }
 
 const usePreferences = (defaultPreferences) => {
@@ -78,7 +62,7 @@ const usePreferences = (defaultPreferences) => {
     return { preferences, setPreferences, updatePreference };
 };
 
-export default function ViewListTable({ apiUrl, config, currentPreferences }: TableProps) {
+export default function ViewListTable({ config, currentPreferences }: TableProps) {
     // preferences
     const [query, setQuery] = useState<string>(currentPreferences?.[`${config.module}-vlq`] || "");
     const [sortColumn, setSortColumn] = useState<string | null>(currentPreferences?.[`${config.module}-vlsc`] || null);
@@ -93,15 +77,14 @@ export default function ViewListTable({ apiUrl, config, currentPreferences }: Ta
     const [pages, setPages] = useState(0);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
-    const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const fetchData = async () => {
         setLoading(true);
-        await secureFetch(`${apiUrl}/account/preferences`, {
+        await secureFetch(`/account/preferences`, {
             method: "PUT",
             body: JSON.stringify({ preferences }),
         });
-        let endpoint = `${apiUrl}/${config.module}/search?`;
+        let endpoint = `/${config.module}/search?`;
         if (query !== "") endpoint += `query=${query}&`;
         filters.forEach(filter => {
             endpoint += `${filter.name}=${filter.value}&`;
@@ -120,7 +103,7 @@ export default function ViewListTable({ apiUrl, config, currentPreferences }: Ta
 
     useEffect(() => {
         fetchData();
-    }, [apiUrl, config.module, sortOrder, sortColumn, query, page, pageSize, filters])
+    }, [config.module, sortOrder, sortColumn, query, page, pageSize, filters])
 
     return (
         <div className='flex flex-1 flex-col space-y-4'>
@@ -132,8 +115,7 @@ export default function ViewListTable({ apiUrl, config, currentPreferences }: Ta
                 setQuery={setQuery}
                 setPage={setPage}
                 updatePreference={updatePreference}
-                filterEndpoints={config.entity.filters}
-                apiUrl={apiUrl}
+                filterEndpoints={config?.entity?.filters}
             />
 
             <div className='relative flex flex-1'>
@@ -177,12 +159,12 @@ export default function ViewListTable({ apiUrl, config, currentPreferences }: Ta
                                 <TableBody>
                                     {data.map((item: any) =>
                                         <TableRow key={nanoid()}>
-                                            {config.fields.filter(field => field.showInList && !hiddenColumns.has(field.field)).map(field => {
-                                                const nestedPath = field.nestedValue || field.field;
-                                                const fieldValue = getNestedValue(item, nestedPath);
+                                            {config.fields.filter(field => !hiddenColumns.has(field.name)).map(field => {
+                                                const nestedField = field.nestedField || field.name
+                                                const fieldValue = getNestedValue(item, nestedField)
                                                 const redirectPath = field.redirect ? resolveRedirectPath(field.redirect, item) : null;
                                                 return (
-                                                    <TableCell key={`${item.id}-${field.field}`}>
+                                                    <TableCell key={`${item.id}-${field.name}`}>
                                                         {redirectPath ? (
                                                             <Link className="text-primary hover:text-opacity-90 hover:underline" href={`/dashboard/${redirectPath}`}>
                                                                 {fieldValue}
@@ -197,7 +179,6 @@ export default function ViewListTable({ apiUrl, config, currentPreferences }: Ta
                                                 <ViewListActions
                                                     id={item.id}
                                                     module={config.module}
-                                                    apiUrl={apiUrl}
                                                     onSuccess={() => fetchData()}
                                                 />
                                             </TableCell>

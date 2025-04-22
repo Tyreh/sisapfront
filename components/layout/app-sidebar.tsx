@@ -1,5 +1,5 @@
 'use client';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,17 +32,16 @@ import {
 import { navItems } from '@/constants/data';
 import { IconShieldLock } from "@tabler/icons-react"
 import {
-  BadgeCheck,
-  Bell,
   ChevronRight,
   ChevronsUpDown,
-  CreditCard,
   GalleryVerticalEnd,
   LogOut
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import Image from "next/image";
 
 export const company = {
   name: 'Acmse Inc',
@@ -54,22 +53,34 @@ export default function AppSidebar({
   user,
 }: {
   user: {
-    firstName: string
-    lastName: string
+    fullName: string
     username: string
-    company: {
-      name: string;
-    }
+    initials: string
   }
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:3000/api/auth/logout', { method: 'POST' });
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+    }
+  };
 
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
         <div className='flex gap-2 py-2 text-sidebar-accent-foreground'>
           <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
-            <company.logo className='size-4' />
+          <Image
+            src="/logo2.png"
+            alt="Logo"
+            width={200}
+            height={200}
+            />
           </div>
           <div className='grid flex-1 text-left text-sm leading-tight'>
             <span className='truncate font-semibold'>SISAP</span>
@@ -147,15 +158,15 @@ export default function AppSidebar({
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
                 >
                   <Avatar className='h-8 w-8 rounded-lg'>
-                    <AvatarFallback className="rounded-lg">{`${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`}</AvatarFallback>
+                    <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
 
                   </Avatar>
                   <div className='grid flex-1 text-left text-sm leading-tight'>
                     <span className='truncate font-semibold'>
-                      {`${user.firstName?.split(' ')[0]} ${user.lastName?.split(' ')[0]}`}
+                      {user.fullName}
                     </span>
                     <span className='truncate text-xs'>
-                      @{user.username}
+                      {user.username}
                     </span>
                   </div>
                   <ChevronsUpDown className='ml-auto size-4' />
@@ -170,35 +181,29 @@ export default function AppSidebar({
                 <DropdownMenuLabel className='p-0 font-normal'>
                   <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
                     <Avatar className='h-8 w-8 rounded-lg'>
-                      <AvatarFallback className="rounded-lg">{`${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`}</AvatarFallback>
+                      <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
                     </Avatar>
                     <div className='grid flex-1 text-left text-sm leading-tight'>
                       <span className='truncate font-semibold'>
-                        {`${user.firstName?.split(' ')[0]} ${user.lastName?.split(' ')[0]}`}
+                        {user.fullName}
                       </span>
                       <span className='truncate text-xs'>
                         {' '}
-                        @{user.username}
+                        {user.username}
                       </span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <BadgeCheck />
-                    Mi Cuenta
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/auth/forgotPassword')}>
                     <IconShieldLock />
                     Cambiar Contraseña
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                {/* <DropdownMenuItem onClick={() => signOut()}> */}
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut />
-                  Log out
+                  Cerrar Sesión
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

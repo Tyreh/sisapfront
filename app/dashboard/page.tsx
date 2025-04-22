@@ -4,15 +4,34 @@ import { Card, CardTitle, CardHeader, CardContent, CardDescription } from "@/com
 import { secureFetch } from "@/secure-fetch";
 import { IconBrandWhatsapp, IconCircleFilled, IconTrees } from "@tabler/icons-react";
 import Reminder from "./reminder/reminder";
+import Link from "next/link";
+
+interface CurrentUserData {
+    id: string;
+    username: string;
+    dependency: string;
+    fullName: string;
+    lastLogin: string;
+    lastPasswordDate: string;
+    lastPasswordModified: string;
+    initials: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  strategicLine: string;
+  finished: boolean;
+  coreProcess: string;
+}
 
 export default async function Page() {
-  const userData = await secureFetch(`${process.env.API_URL}/apiUser/logged-user`);
-  const loggedUsers = await secureFetch(`${process.env.API_URL}/apiUser/logged-users`);
-  const projectData = await secureFetch(`${process.env.API_URL}/project`);
-  const inExecutionProjects = projectData.data.filter(project => project.projectStatus.name == 'En ejecución').length;
-  const completedProjects = projectData.data.filter(project => project.projectStatus.name == 'Completado').length;
+  const userData = await secureFetch(`/auth/currentUser`);
+  const loggedUsers = await secureFetch(`/auth/currentUsers`);
+  const projectData = await secureFetch(`/project`);
+  const inExecutionProjects = projectData.data.filter((project: Project) => !project.finished).length;
+  const completedProjects = projectData.data.filter((project: Project) => project.finished).length;
 
-  console.log(userData);
   return (
     <PageContainer>
       <div className="pb-10">
@@ -41,9 +60,6 @@ export default async function Page() {
             </CardHeader>
             <CardContent>
               <div className='text-sm text-center'>{userData.data.lastLogin}</div>
-              <p className='text-xs text-muted-foreground text-center'>
-                IP: {userData.data.lastIpLogin}
-              </p>
             </CardContent>
           </Card>
           <Card className="col-span-full lg:col-span-1">
@@ -75,16 +91,16 @@ export default async function Page() {
             </CardHeader>
             <CardContent>
               <div className='space-y-8'>
-                {loggedUsers.data.map((loggedUser, index) =>
+                {loggedUsers.data.map((loggedUser: CurrentUserData, index: number) =>
                   <div key={index} className='flex items-center'>
                     <Avatar className='h-9 w-9'>
-                      <AvatarFallback>{`${loggedUser.firstName?.charAt(0)}${loggedUser.lastName?.charAt(0)}`}</AvatarFallback>
+                      <AvatarFallback>{loggedUser.initials}</AvatarFallback>
                     </Avatar>
 
                     <div className='ml-4 space-y-1'>
-                      <p className='text-sm font-medium leading-none'>{loggedUser.firstName?.split(' ')[0]} {loggedUser.lastName?.split(' ')[0]}</p>
+                      <p className='text-sm font-medium leading-none'>{loggedUser.fullName}</p>
                       <p className='text-sm text-muted-foreground'>
-                        {loggedUser.email}
+                        {loggedUser.username}
                       </p>
                     </div>
                     <div className='ml-auto font-medium'><IconCircleFilled className="w-4 h-4 text-green-600" /></div>
@@ -125,13 +141,13 @@ export default async function Page() {
             <h2 className="text-2xl font-bold mb-6 text-roble">Tus Proyectos</h2>
           </div>
 
-          {projectData.data.map((project, index) =>
+          {projectData.data.map((project: Project, index: number) =>
             <Card key={index} className="col-span-full lg:col-span-1">
               <CardHeader className='flex flex-row items-center justify-center space-y-0 pb-2'>
-                <CardTitle className='text-md font-semibold'>{project.name}</CardTitle>
+                <CardTitle className='text-md font-semibold'><Link href={`/project/${project.id}`}>{project.name}</Link></CardTitle>
               </CardHeader>
               <CardContent>
-                <div className='text-sm text-center'>Estado: {project.projectStatus.name}</div>
+                <div className='text-sm text-center'>{project.finished ? 'Completado' : 'En Ejecución'}</div>
               </CardContent>
             </Card>
 

@@ -16,7 +16,7 @@ import FormTextArea from "@/components/ui/form/form-text-area2";
 import { secureFetch } from "@/secure-fetch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pen, Plus } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
@@ -24,20 +24,17 @@ import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
-    id: z.string(),
     content: z.string({ required_error: "Este campo es obligatorio" }).min(1, "Este campo es obligatorio")
 });
 
 interface Props {
-    apiUrl: string;
     id?: string;
 }
 
-export default function ReminderForm({ apiUrl, id }: Props) {
+export default function ReminderForm({  id }: Props) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            id: "",
             content: ""
         },
         reValidateMode: "onBlur",
@@ -52,10 +49,9 @@ export default function ReminderForm({ apiUrl, id }: Props) {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true);
-        const response = await secureFetch(`${apiUrl}/note${id ? `/${id}` : ''}`, {
+        const response = await secureFetch(`/note${id ? `/${id}` : ''}`, {
             method: id ? 'PATCH' : 'POST',
             body: JSON.stringify({
-                ...(id ? { id: id} : {}),
                 content: values.content
             })
         });
@@ -80,8 +76,7 @@ export default function ReminderForm({ apiUrl, id }: Props) {
 
     async function fetchData() {
         setLoadingData(true);
-        const response = await secureFetch(`${apiUrl}/note/${id}`);
-        form.setValue("id", response.data.id);
+        const response = await secureFetch(`/note/${id}`);
         form.setValue("content", response.data.content);
         setLoadingData(false);
     }

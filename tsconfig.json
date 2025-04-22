@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "secure-fetch.js"
-  ],
+, "middleware.ts"  ],
   "exclude": [
     "node_modules"
   ]

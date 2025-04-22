@@ -45,14 +45,16 @@ export default function ResetPasswordPage({ token }: { token: string }) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
-    const response = await resetPassword(values.password, token);
-    if (response.status === 200) {
-      setSuccess(true);
-    } else {
-      setError(response.message);
-      setSuccess(false);
-    }
-    setLoading(false);
+
+      const response = await resetPassword(values.password, token);
+      if (response.status === 200) {
+        setSuccess(true);
+      } else {
+        setError(response.message);
+        setSuccess(false);
+      }
+      setLoading(false);
+
   }
 
   if (success) {

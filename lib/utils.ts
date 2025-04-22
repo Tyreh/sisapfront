@@ -14,3 +14,8 @@ export function resolveRedirectPath(template: string, record: any) {
       return getNestedValue(record, path) || `{${path}}`; // Si el valor no existe, deja el placeholder.
   });
 }
+
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return "Ocurrió un error inesperado";
+}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodType, infer as zInfer } from "zod";
 import { secureFetch } from "@/secure-fetch";
@@ -15,7 +15,6 @@ interface Props<T extends ZodType<any, any>> {
     defaultValues: zInfer<T>;
     module: string;
     onSubmit?: (data: zInfer<T>) => Promise<any>;
-    apiUrl?: string;
     children: React.ReactNode;
 }
 
@@ -24,7 +23,6 @@ export function FormLayout<T extends ZodType<any, any>>({
     defaultValues,
     module,
     onSubmit,
-    apiUrl,
     children
 }: Props<T>) {
     const router = useRouter();
@@ -43,7 +41,7 @@ export function FormLayout<T extends ZodType<any, any>>({
         if (onSubmit) {
             response = await onSubmit(data);
         } else {
-            response = await secureFetch(`${apiUrl}/${module}${data?.id ? `/${data.id}` : ''}`, {
+            response = await secureFetch(`/${module}${data?.id ? `/${data.id}` : ''}`, {
                 method: data?.id ? 'PATCH' : 'POST',
                 body: JSON.stringify(data)
             });
@@ -80,7 +78,7 @@ export function FormLayout<T extends ZodType<any, any>>({
             duration: 3000
         });
 
-        router.push(`/dashboard/${module}/${response.data.id}`);
+        router.push(`/dashboard/${module}/${response.id}`);
         router.refresh();
     };
 

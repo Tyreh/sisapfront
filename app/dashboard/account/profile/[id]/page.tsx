@@ -3,8 +3,14 @@ import { Label } from "@/components/ui/label";
 import { getNestedValue, resolveRedirectPath } from "@/lib/utils";
 import React from "react";
 import Link from "next/link";
-
 import PageContainer from "@/components/layout/page-container";
+
+interface FieldMetadata {
+    field: string;
+    nestedValue: string;
+    redirect: string;
+    label: string;
+}
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
     const params = await props.params;
@@ -12,7 +18,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     const response = await secureFetch(`${process.env.API_URL}/account/profile${id ? `?id=${id}` : ''}`);
 
     if (response.status !== 200) {
-
+        return (
+            <PageContainer>
+                <div className="flex flex-1 justify-center items-center">
+                    <h1>No se encontró ningún usuario.</h1>
+                </div>
+            </PageContainer>
+        );
     }
 
     return (
@@ -26,7 +38,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
                 </div>
                 <div className="flex flex-col">
                     <div className="w-full grid grid-cols-1 gap-4 p-4 border rounded-lg">
-                        {response.metadata.fields.map(field => {
+                        {response.metadata.fields.map((field: FieldMetadata) => {
                             const nestedPath = field.nestedValue || field.field;
                             const fieldValue = getNestedValue(response.data, nestedPath);
                             const redirectPath = field.redirect ? resolveRedirectPath(field.redirect, response.data) : null;

@@ -7,7 +7,6 @@ import { Form } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { login } from "./action";
 import { z } from "zod"
 
 const formSchema = z.object({
@@ -15,7 +14,11 @@ const formSchema = z.object({
   password: z.string({ required_error: "Este campo es obligatorio" }).min(1, "Este campo es obligatorio").max(30, "La contraseña ingresada no es válida")
 });
 
-export function LoginForm() {
+interface Props {
+  apiUrl: string;
+}
+
+export function LoginForm({ apiUrl }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -27,16 +30,29 @@ export function LoginForm() {
     },
   })
 
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
-    const response = await login(values.username, values.password);
-    if (response.status === 200) {
-      router.push("/dashboard");
-    } else {
-      setError(response.message);
+    try {
+
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: values.username, password: values.password }),
+        credentials: "include",
+      });
+      const data = await response.json();
+
+      if (data.status === 200) {
+        router.push("/dashboard");
+      } else {
+        setError(data.message);
+        setLoading(false);
+      }
+    } catch {
+      setError("El servidor no está disponible en este momento. Por favor, inténtalo nuevamente más tarde.");
       setLoading(false);
     }
+
   }
 
   return (

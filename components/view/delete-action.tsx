@@ -8,20 +8,19 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Props {
-    apiUrl: string;
     moduleName: string;
     id: string;
     onSuccess?: () => void;
 }
 
-export default function DeleteAction({ apiUrl, moduleName, id, onSuccess }: Props) {
+export default function DeleteAction({ moduleName, id, onSuccess }: Props) {
     const [loading, setLoading] = useState<boolean>(false);
     const router = useRouter();
     const { toast } = useToast();
 
     const confirmDelete = async () => {
         setLoading(true);
-        const response = await secureFetch(`${apiUrl}/${moduleName}/${id}`, { method: "DELETE" });
+        const response = await secureFetch(`/${moduleName}/${id}`, { method: "DELETE" });
 
         if (response.status === 200) {
             toast({

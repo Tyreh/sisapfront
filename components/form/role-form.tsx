@@ -25,7 +25,7 @@ export function RoleForm({ apiUrl, module, data }: FormBaseProps) {
         ),
     });
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: z.infer<typeof schema>) => {
         const response = await secureFetch(`${apiUrl}/${module}${data?.id ? `/${data.id}` : ''}`, {
             method: data?.id ? 'PATCH' : 'POST',
             body: JSON.stringify({
@@ -34,17 +34,20 @@ export function RoleForm({ apiUrl, module, data }: FormBaseProps) {
             })
         });
 
-        for (const permission of data.permissions) {
-            await secureFetch(`${apiUrl}/rolePermission${permission?.id ? `/${permission.id}` : ''}`, {
-                method: permission?.id ? 'PATCH' : 'POST',
-                body: JSON.stringify({
-                    ...(permission.id ? { id: permission.id } : {}),
-                    role: { id: response.data.id },
-                    permission: { id: permission.permission.id }
-                })
-            });
+        if (response.status === 200) {
+            console.log(data.permissions);
+            for (const rolePermission of data.permissions) {
+                console.log(rolePermission);
+                await secureFetch(`${apiUrl}/rolePermission${rolePermission?.id ? `/${rolePermission.id}` : ''}`, {
+                    method: rolePermission?.id ? 'PATCH' : 'POST',
+                    body: JSON.stringify({
+                        ...(rolePermission.id ? { id: rolePermission.id } : {}),
+                        role: { id: response.data.id },
+                        permission: { id: rolePermission.permission.id }
+                    })
+                });
+            }
         }
-
         return response;
     }
 
@@ -55,7 +58,7 @@ export function RoleForm({ apiUrl, module, data }: FormBaseProps) {
                 name="permissions"
                 label="Permisos"
                 columns={[]}
-                fetchUrl={`${apiUrl}/userRole/role/${data?.id}`}
+                fetchUrl={data?.id ? `${apiUrl}/rolePermission/search/role/${data?.id}` : undefined}
                 className="col-span-full"
                 defaultItem={{
                     id: "",
@@ -63,7 +66,7 @@ export function RoleForm({ apiUrl, module, data }: FormBaseProps) {
                     role: { id: "" },
                 }}
                 cells={[
-                    (index) => <FormRelation apiUrl={apiUrl} name={`permission.${index}.permissions`} module="permission" />,
+                    (index) => <FormRelation apiUrl={apiUrl} name={`permissions.${index}.permission`} module="permission" />,
                 ]}
             />
         </FormLayout>

@@ -1,4 +1,3 @@
-import React from "react";
 import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useFormContext, FieldValues, Path } from "react-hook-form";
 import ViewRelationListTable from "@/components/view/relation/view-relation-list-table";
@@ -9,18 +8,19 @@ type FormRelationType<T extends FieldValues> = {
     label?: string;
     description?: string;
     className?: string;
-    apiUrl: string;
+    selectLabel?: string;
+    defaultLabel?: string;
 };
 
-export default function FormRelation<T extends FieldValues>({
-    className, label, description, name, module, apiUrl
-}: FormRelationType<T>) {
-    const { setValue, watch, formState: { errors } } = useFormContext<T>(); 
+export default function FormRelation<T extends FieldValues>({ className, label, description, name, module, defaultLabel }: FormRelationType<T>) {
+    const { setValue, watch, formState: { errors } } = useFormContext<T>();
 
     const selectedValue = watch(name);
+    console.log("selectedValue", name, selectedValue); // ← esto debe mostrarte el valor correcto
+
 
     const handleSelect = (selectedItem: any) => {
-        setValue(name, selectedItem); 
+        setValue(name, selectedItem);
     };
 
     return (
@@ -28,10 +28,10 @@ export default function FormRelation<T extends FieldValues>({
             {label && <FormLabel>{label}</FormLabel>}
             <FormControl>
                 <ViewRelationListTable
-                    apiUrl={apiUrl}
                     module={module}
                     onSelect={handleSelect}
-                    defaultOptionId={selectedValue?.id || undefined} 
+                    defaultLabel={defaultLabel}
+                    selectedId={selectedValue}
                 />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

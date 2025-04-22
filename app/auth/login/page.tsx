@@ -11,7 +11,7 @@ export default function LoginPage() {
           Ingresa tus credenciales para acceder a tu cuenta
         </p>
       </div>
-      <LoginForm />
+      <LoginForm apiUrl={process.env.API_URL || ""} />
       <p className='px-8 text-center text-sm text-muted-foreground pt-4'>
         <Link href='/auth/forgotPassword' className='underline underline-offset-4 hover:text-primary'>
           ¿Olvidaste tu contraseña?

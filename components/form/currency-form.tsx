@@ -5,17 +5,14 @@ import { FormLayout } from "@/components/ui/form/form-layout";
 import FormInput from "@/components/ui/form/form-input";
 import { z } from "zod";
 
-export function CurrencyForm({ apiUrl, module, data }: FormBaseProps) {
+export function CurrencyForm({ module, data }: FormBaseProps) {
     const schema = z.object({
-        id: z.string().optional(),
-        name: z.string(),
-        symbol: z.string()
+        name: z.string()
     });
 
     return (
-        <FormLayout module={module} apiUrl={apiUrl} schema={schema} defaultValues={{ id: data?.id || "", name: data?.name || "", symbol: data?.symbol || "" }}>
-            <FormInput name="name" label="Nombre de la divisa" />
-            <FormInput name="symbol" label="Símbolo de la divisa" />
+        <FormLayout module={module} schema={schema} defaultValues={{ name: data?.name || "" }}>
+            <FormInput name="name" label="Nombre de la divisa" className="col-span-full" />
         </FormLayout>
     )
 }

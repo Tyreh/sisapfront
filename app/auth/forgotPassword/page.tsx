@@ -32,7 +32,9 @@ export default function ForgotPasswordPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
     const response = await forgotPassword(values.username);
-    if (response.status === 429) {
+    if (response.status === 500) {
+      setError("El servidor no está disponible en este momento. Por favor, inténtalo nuevamente más tarde.");
+    } else if (response.status === 429) {
       setError(response.message);
       setSuccess(false);
     } else {
@@ -66,7 +68,7 @@ export default function ForgotPasswordPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-4'>
-            <FormInput name="username" label="Usuario" control={form.control} props={{ disabled: loading, placeholder: "Nombre de usuario" }} />
+            <FormInput name="username" label="Usuario" props={{ disabled: loading, placeholder: "Nombre de usuario" }} />
             {error && <p className="text-sm mt-2 text-red-500">{error}</p>}
             <Button type="submit" loading={loading} className="mt-2">Restablecer Contraseña</Button>
           </div>

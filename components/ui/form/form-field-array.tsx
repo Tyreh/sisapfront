@@ -1,15 +1,14 @@
 'use client'
 
-import React, { ReactNode, useEffect, useState } from "react";
-import { useFormContext, useFieldArray, FieldValues, ArrayPath } from "react-hook-form";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { useFormContext, useFieldArray, FieldValues, ArrayPath } from "react-hook-form";
+import React, { ReactNode, useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { FormMessage } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Plus, Minus } from "lucide-react";
 import { nanoid } from "nanoid";
-import { secureFetch } from "@/secure-fetch";
 
 interface FieldArrayComponentProps<T extends FieldValues> {
     name: ArrayPath<T>;
@@ -18,9 +17,7 @@ interface FieldArrayComponentProps<T extends FieldValues> {
     className?: string;
     minItems?: number;
     cells: ((index: number) => ReactNode)[];
-    /** Objeto con los valores iniciales para cada elemento del field array */
     defaultItem?: any;
-    fetchUrl?: string;
 }
 
 const FormFieldArray = <T extends FieldValues>({
@@ -31,69 +28,29 @@ const FormFieldArray = <T extends FieldValues>({
     minItems = 0,
     cells,
     defaultItem, // nueva propiedad para los valores por defecto al agregar
-    fetchUrl
 }: FieldArrayComponentProps<T>) => {
     const { control, formState: { errors } } = useFormContext<T>();
     const { fields, append, remove } = useFieldArray({ control, name });
-    const [fieldKeys, setFieldKeys] = useState<string[]>(fields.map(() => nanoid()));
-    const [loading, setLoading] = useState<boolean>(false);
+    // const [fieldKeys, setFieldKeys] = useState<string[]>(fields.map(() => nanoid()));
 
 
     useEffect(() => {
-        if (!fetchUrl) return;
-    
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await secureFetch(fetchUrl);
-                if (Array.isArray(response.data)) {
-                    response.data.forEach(item => {
-                        const newItem = JSON.parse(JSON.stringify(defaultItem));
-                        Object.keys(newItem).forEach(key => {
-                            if (typeof newItem[key] === "object" && newItem[key] !== null) {
-                                Object.keys(newItem[key]).forEach(subKey => {
-                                    if (item[subKey] !== undefined) {
-                                        newItem[key][subKey] = item[subKey];
-                                    }
-                                });
-                            } else if (item[key] !== undefined) {
-                                newItem[key] = item[key];
-                            }
-                        });
-    
-                        append(newItem);
-                    });
-    
-                    setFieldKeys(prevKeys => [...prevKeys, ...response.data.map(() => nanoid())]);
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-    
-        fetchData();
-    }, [fetchUrl, append, defaultItem]);
-    
+        append(defaultItem);
+    }, [append, defaultItem]);
 
-    useEffect(() => {
-        setFieldKeys(fields.map(() => nanoid()));
-    }, [fields.length]);
+    // useEffect(() => {
+    //     setFieldKeys(fields.map(() => nanoid()));
+    // }, [fields, fields.length]);
 
     const handleAppend = () => {
         append(defaultItem ?? {}); // se utiliza el objeto pasado o un objeto vacío
-        setFieldKeys(prevKeys => [...prevKeys, nanoid()]);
+        // setFieldKeys(prevKeys => [...prevKeys, nanoid()]);
     };
 
     const handleRemove = (index: number) => {
         remove(index);
-        setFieldKeys(prevKeys => prevKeys.filter((_, i) => i !== index));
+        // setFieldKeys(prevKeys => prevKeys.filter((_, i) => i !== index));
     };
-
-    if (loading) {
-        return <div>cargando...</div>
-    }
 
     return (
         <div className={`space-y-2 ${className}`}>
@@ -115,14 +72,15 @@ const FormFieldArray = <T extends FieldValues>({
                                     {columns.map(column => (
                                         <TableHead key={nanoid()}>{column}</TableHead>
                                     ))}
-                                    <TableHead></TableHead>
+                                    <TableHead></TableHead>2
                                 </TableRow>
                             </TableHeader>
                         )}
 
                         <TableBody>
                             {fields.map((_, index) => (
-                                <TableRow key={fieldKeys[index]} className="hover:bg-inherit">
+                                // <TableRow key={fieldKeys[index]} className="hover:bg-inherit">
+                                <TableRow key={nanoid()} className="hover:bg-inherit">
                                     {cells.map((cellRenderer, cellIndex) => (
                                         <TableCell key={cellIndex}>
                                             {cellRenderer(index)}
@@ -144,5 +102,6 @@ const FormFieldArray = <T extends FieldValues>({
         </div>
     );
 };
+
 
 export default FormFieldArray;

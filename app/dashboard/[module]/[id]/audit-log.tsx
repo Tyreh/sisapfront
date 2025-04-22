@@ -19,34 +19,34 @@ export default function AuditLog({ audits }: Props) {
                 </CollapsibleTrigger>
             </div>
             <CollapsibleContent className="p-6">
-                {audits.map((record: never) => {
+                {audits.map((record: any, index: number) => {
                     const eventLabels: { [key: string]: string } = {
-                        create: 'creado',
-                        update: 'actualizado',
-                        delete: 'eliminado',
+                        CREATE: 'creado',
+                        UPDATE: 'actualizado',
+                        DELETE: 'eliminado',
                     };
 
-                    const eventLabel = eventLabels[record['event']] || 'acción desconocida';
-                    const eventColor = record['event'] === 'create'
+                    const eventLabel = eventLabels[record.event] || 'acción desconocida';
+                    const eventColor = record.event === 'CREATE'
                         ? 'bg-green-500'
-                        : record['event'] === 'update'
+                        : record.event === 'UPDATE'
                             ? 'bg-blue-500'
-                            : record['event'] === 'delete'
+                            : record.event === 'DELETE'
                                 ? 'bg-red-500'
                                 : 'bg-gray-500';
 
                     return (
                         <div
-                            key={record['id']}
+                            key={index}
                             className={`after:absolute after:inset-y-0 after:w-px after:bg-gray-500/20 relative pl-6 after:left-0 grid gap-10 dark:after:bg-gray-400/20`}
                         >
                             <div className="grid gap-1 text-sm relative">
                                 <div className={`aspect-square w-3 ${eventColor} rounded-full absolute left-0 translate-x-[-29.5px] z-10 top-1 dark:bg-gray-50`} />
-                                <div className="font-medium">{record['date']}</div>
+                                <div className="font-medium">{record.createdAt}</div>
                                 <div className="text-gray-500 dark:text-gray-400">
                                     El registro fue {eventLabel} por
-                                    <Link href={`/public-profile/${record['user']['id']}`} className={`${buttonVariants({ variant: "link" })} p-0 m-0`}>
-                                        {record['user']['name']} {record['user']['lastName']}
+                                    <Link href={`/public-profile/${record.createdBy.id}`} className={`${buttonVariants({ variant: "link" })} p-0 m-0`}>
+                                        {record.createdBy.fullName}
                                     </Link>
                                 </div>
                             </div>

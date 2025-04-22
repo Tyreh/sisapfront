@@ -1,5 +1,7 @@
 'use server'
 
+import { getErrorMessage } from "@/lib/utils";
+
 export async function validateToken(recoveryToken: string) {
     const response = await fetch(`${process.env.API_URL}/auth/validateRecoveryToken`, {
         method: 'POST',
@@ -21,10 +23,10 @@ export async function resetPassword(rawPassword: string, recoveryToken: string) 
 
         const data = await response.json();
         return data;
-    } catch (error: any) {
+    } catch (error) {
         return {
             status: 500,
-            message: error.message || "Ocurrió un error al intentar iniciar sesión",
+            message: getErrorMessage(error),
         };
     }
 }

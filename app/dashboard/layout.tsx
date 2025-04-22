@@ -13,7 +13,8 @@ export const metadata: Metadata = {
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const cookieStore = await cookies();
     const defaultOpen = cookieStore.get('sidebar:state')?.value === 'true';
-    const userData = await secureFetch(`${process.env.API_URL}/apiUser/logged-user`);
+
+    const userData = await secureFetch("/auth/currentUser");
     return (
         <SidebarProvider defaultOpen={defaultOpen}>
             <AppSidebar user={userData.data} />

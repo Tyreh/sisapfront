@@ -14,6 +14,7 @@ export interface FormBaseProps {
     apiUrl: string;
     module: string;
     data: any;
+    
 }
 
 export default async function Page(props: { params: Promise<any>; searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -21,13 +22,13 @@ export default async function Page(props: { params: Promise<any>; searchParams: 
     const { module } = params;
     const { id } = await props.searchParams;
 
-    const response = await secureFetch(`${process.env.API_URL}/${module}${id ? `/${id}` : ''}`);
+    const response = await secureFetch(`/${module}${id ? `/${id}` : '/metadata'}`);
 
     if (response.status !== 200) {
         redirect("/dashboard");
     }
 
-    const formComponents: { [key: string]: React.FC<{ apiUrl: string; module: string; id?: string }> } = {
+    const formComponents: { [key: string]: React.FC<FormBaseProps> } = {
         dependency: DependencyForm,
         currency: CurrencyForm,
         project: ProjectForm,
@@ -40,7 +41,7 @@ export default async function Page(props: { params: Promise<any>; searchParams: 
     const FormComponent = formComponents[module];
 
     return (
-        <ViewEditLayout metadata={response.metadata} id={id} title={response?.data?.title}>
+        <ViewEditLayout response={response}>
             {FormComponent ? <FormComponent apiUrl={process.env.API_URL!} module={module} data={id ? response.data : null} /> : <p>Formulario no disponible</p>}
         </ViewEditLayout>
     );

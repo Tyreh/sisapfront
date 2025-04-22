@@ -2,7 +2,6 @@ import React from 'react';
 import { SidebarTrigger } from '../ui/sidebar';
 import { Separator } from '../ui/separator';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-// import SearchInput from '../search-input';
 import { UserNav } from '@/components/layout/user-nav';
 import ThemeToggle from './ThemeToggle/theme-toggle';
 
@@ -10,9 +9,9 @@ export default function Header({
   user,
 }: {
   user: {
-    name: string
-    lastName: string
-    email: string
+    fullName: string
+    username: string
+    initials: string;
   }
 }) {
   return (
@@ -24,9 +23,6 @@ export default function Header({
       </div>
 
       <div className='flex items-center gap-2 px-4'>
-        <div className='hidden md:flex'>
-          {/* <SearchInput /> */}
-        </div>
         <UserNav user={user} />
         <ThemeToggle />
       </div>

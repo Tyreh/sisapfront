@@ -22,7 +22,6 @@ export interface Filter {
 interface ViewListTableFiltersProps {
     moduleName: string;
     query: string;
-    apiUrl: string;
     filterEndpoints?: string[];
     filters: Filter[];
     setPage: (page: number) => void;
@@ -39,8 +38,7 @@ export const ViewListTableFilters = ({
     setPage,
     filterEndpoints,
     filters,
-    setFilters,
-    apiUrl,
+    setFilters
 }: ViewListTableFiltersProps) => {
 
     const handleSearch = useDebouncedCallback(async (value: string) => {
@@ -87,7 +85,6 @@ export const ViewListTableFilters = ({
                 {filterEndpoints && filterEndpoints.map((filter, index) => (
                     <React.Fragment key={index}>
                         <ViewRelationListTable
-                            apiUrl={apiUrl}
                             module={filter}
                             onSelect={(selectedItem: any) => handleSelect(selectedItem, filter)}
                             label={true}

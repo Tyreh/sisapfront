@@ -2,20 +2,17 @@
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { secureFetch } from "@/secure-fetch";
 import { IconX } from "@tabler/icons-react";
-import { Pen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Props {
-    apiUrl: string;
     noteId: string;
 }
 
-export default function DeleteReminder({ apiUrl, noteId }: Props) {
+export default function DeleteReminder({ noteId }: Props) {
     const { toast } = useToast();
     const router = useRouter();
     const [loading, setLoading] = useState<boolean>(false);
@@ -23,7 +20,7 @@ export default function DeleteReminder({ apiUrl, noteId }: Props) {
 
     async function handleDelete(noteId: string) {
         setLoading(true);
-        const response = await secureFetch(`${apiUrl}/note/${noteId}`, {
+        const response = await secureFetch(`/note/${noteId}`, {
             method: 'DELETE',
         });
 

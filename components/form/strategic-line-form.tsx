@@ -6,9 +6,8 @@ import FormInput from "@/components/ui/form/form-input";
 import { z } from "zod";
 import FormTextArea from "../ui/form/form-text-area";
 
-export function StrategicLineForm({ apiUrl, module, data }: FormBaseProps) {
+export function StrategicLineForm({ module, data }: FormBaseProps) {
     const schema = z.object({
-        id: z.string().optional(),
         name: z.string(),
         startYear: z.string().transform((val) => Number(val)).or(z.number()),
         endYear: z.string().transform((val) => Number(val)).or(z.number()),
@@ -16,8 +15,7 @@ export function StrategicLineForm({ apiUrl, module, data }: FormBaseProps) {
     });
 
     return (
-        <FormLayout module={module} apiUrl={apiUrl} schema={schema} defaultValues={{
-            id: data?.id || "",
+        <FormLayout module={module} schema={schema} defaultValues={{
             name: data?.name || "",
             description: data?.description || "",
             startYear: data?.startYear || undefined,

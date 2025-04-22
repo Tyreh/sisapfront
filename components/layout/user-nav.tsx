@@ -10,23 +10,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { BadgeCheck, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { IconShieldLock } from "@tabler/icons-react"
+import { useRouter } from 'next/navigation';
+
 export function UserNav({
   user,
 }: {
   user: {
-    firstName: string
-    lastName: string
+    fullName: string
+    initials: string
     username: string
   }
 }) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:3000/api/auth/logout', { method: 'POST' });
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
-            <AvatarFallback className="rounded-lg">{`${user.firstName?.charAt(0)}${user.lastName?.charAt(0)}`}</AvatarFallback>
+            <AvatarFallback className="rounded-lg">{user.initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -34,29 +47,23 @@ export function UserNav({
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
-              {`${user.firstName?.split(' ')[0]} ${user.lastName?.split(' ')[0]}`}
+              {user.fullName}
             </p>
             <p className='text-xs leading-none text-muted-foreground'>
-              @{user.username}
+              {user.username}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <BadgeCheck />
-            Mi Cuenta
-          </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/auth/forgotPassword')}>
             <IconShieldLock />
             Cambiar Contraseña
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        {/* <DropdownMenuItem onClick={() => signOut()}> */}
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut />
-          Log out
+          Cerrar Sesión
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

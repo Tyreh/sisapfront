@@ -1,17 +1,15 @@
 'use client'
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { TableHead, TableHeader, TableRow } from "@/components/ui/sticky-table";
 import { EyeNoneIcon, CaretSortIcon } from "@radix-ui/react-icons";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import React from "react";
-import { useState } from "react";
 
 interface Props {
     fields: {
-        showInList: boolean;
         sortable: boolean;
-        field: string;
+        name: string;
         label: string;
         sortKey?: string;
     }[];
@@ -57,7 +55,7 @@ export default function ViewListHeader({ fields, setSortColumn, setSortOrder, so
         <TableHeader>
             <TableRow>
                 {fields
-                    .filter((field) => field.showInList && !hiddenColumns.has(field.field))
+                    .filter((field) => !hiddenColumns.has(field.name))
                     .map((field) => (
                         <TableHead key={field.label}>
                             <div className="flex items-center space-x-2">
@@ -69,9 +67,9 @@ export default function ViewListHeader({ fields, setSortColumn, setSortOrder, so
                                             className="-ml-3 h-8 data-[state=open]:bg-accent my-2 py-5 whitespace-nowrap"
                                         >
                                             {field.label}
-                                            {sortColumn === (field.sortKey || field.field) && sortOrder === SortOrder.DESC ? (
+                                            {sortColumn === (field.sortKey || field.name) && sortOrder === SortOrder.DESC ? (
                                                 <ArrowDownIcon className="ml-2 h-4 w-4" />
-                                            ) : sortColumn === (field.sortKey || field.field)  && sortOrder === SortOrder.ASC ? (
+                                            ) : sortColumn === (field.sortKey || field.name)  && sortOrder === SortOrder.ASC ? (
                                                 <ArrowUpIcon className="ml-2 h-4 w-4" />
                                             ) : (
                                                 <CaretSortIcon className="ml-2 h-4 w-4" />
@@ -81,18 +79,18 @@ export default function ViewListHeader({ fields, setSortColumn, setSortOrder, so
                                     <DropdownMenuContent align="start">
                                         {field.sortable &&
                                             <React.Fragment>
-                                                <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.field, SortOrder.ASC)}>
+                                                <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.name, SortOrder.ASC)}>
                                                     <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                                                     Orden Ascendente
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.field, SortOrder.DESC)}>
+                                                <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.name, SortOrder.DESC)}>
                                                     <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                                                     Orden Descendente
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                             </React.Fragment>
                                         }
-                                        <DropdownMenuItem onClick={() => toggleColumnVisibility(field.field)}>
+                                        <DropdownMenuItem onClick={() => toggleColumnVisibility(field.name)}>
                                             <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                                             Ocultar Columna
                                         </DropdownMenuItem>

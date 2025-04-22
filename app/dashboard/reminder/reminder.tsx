@@ -9,14 +9,13 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Ellipsis } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
 
 interface Props {
     apiUserId: string;
 }
 
 export default async function Reminder({ apiUserId }: Props) {
-    const notes = await secureFetch(`${process.env.API_URL}/note/search?apiUserId=${apiUserId}`);
+    const notes = await secureFetch(`/note/search?apiUserId=${apiUserId}`);
 
     return (
         <Card className="col-span-2">
@@ -26,7 +25,7 @@ export default async function Reminder({ apiUserId }: Props) {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {notes.data.content.map((note, index) =>
+                    {notes.data.content.map((note: { createdAt: string, modifiedAt: string, id: string, content: string }, index: number) =>
                         <div key={index} className="my-2 bg-muted rounded-md p-3">
                             <div className="font-medium flex justify-between items-center pb-4">
                                 <p className="text-sm text-muted-foreground">{note.createdAt} <span className="text-xs italic">{note.modifiedAt && `(Modificado el ${note.modifiedAt})`}</span></p>
@@ -35,8 +34,8 @@ export default async function Reminder({ apiUserId }: Props) {
                                     <DropdownMenu>
                                         <DropdownMenuTrigger><Ellipsis /></DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuLabel><ReminderForm apiUrl={process.env.API_URL || ""} id={note.id} /></DropdownMenuLabel>
-                                            <DropdownMenuLabel><DeleteReminder apiUrl={process.env.API_URL || ""} noteId={note.id} /></DropdownMenuLabel>
+                                            <DropdownMenuLabel><ReminderForm id={note.id} /></DropdownMenuLabel>
+                                            <DropdownMenuLabel><DeleteReminder noteId={note.id} /></DropdownMenuLabel>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </div>
@@ -46,7 +45,7 @@ export default async function Reminder({ apiUserId }: Props) {
                     )}
                 </div>
                 <div className="flex justify-end pt-4">
-                    <ReminderForm apiUrl={process.env.API_URL || ""} />
+                    <ReminderForm />
                 </div>
             </CardContent>
         </Card>

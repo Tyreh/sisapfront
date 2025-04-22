@@ -11,11 +11,10 @@ import { CircleEllipsis, MoreHorizontal, Pencil, Trash } from "lucide-react";
 interface Props {
     id: string;
     module: string;
-    apiUrl: string;
     onSuccess?: () => void;
 }
 
-export default function ViewListActions({ id, module, apiUrl, onSuccess }: Props) {
+export default function ViewListActions({ id, module, onSuccess }: Props) {
     const [open, setOpen] = useState<boolean>(false);
 
     const onSuccessSubmit = () => {
@@ -47,7 +46,7 @@ export default function ViewListActions({ id, module, apiUrl, onSuccess }: Props
                     </DropdownMenuGroup>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <DeleteAction apiUrl={apiUrl} moduleName={module} id={id} onSuccess={onSuccessSubmit} />
+            <DeleteAction moduleName={module} id={id} onSuccess={onSuccessSubmit} />
         </Dialog>
     );
 }

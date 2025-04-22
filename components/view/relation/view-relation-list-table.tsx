@@ -1,38 +1,34 @@
 "use client"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+} from "@/components/ui/table"
+import {
+    Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger
 } from "@/components/ui/sheet"
-
-import { useEffect, useState } from "react";
-import React from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { useDebouncedCallback } from "use-debounce";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    useEffect, useState
+} from "react"
+import React from "react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+import { useDebouncedCallback } from "use-debounce"
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { ArrowDownIcon, ArrowUpIcon, CaretSortIcon, EyeNoneIcon, PlusCircledIcon } from "@radix-ui/react-icons";
-
-import { getNestedValue } from "@/lib/utils";
-import { secureFetch } from "@/secure-fetch";
-import { Input } from "@/components/ui/input";
-import { IconSearch } from "@tabler/icons-react";
-import { ViewRelationPagination } from "./view-relation-pagination";
-import { ChevronsUpDown, Loader2, X } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { nanoid } from "nanoid";
+import {
+    ArrowDownIcon, ArrowUpIcon, CaretSortIcon,
+    EyeNoneIcon, PlusCircledIcon
+} from "@radix-ui/react-icons"
+import { getNestedValue } from "@/lib/utils"
+import { secureFetch } from "@/secure-fetch"
+import { Input } from "@/components/ui/input"
+import { IconSearch } from "@tabler/icons-react"
+import { ViewRelationPagination } from "./view-relation-pagination"
+import { ChevronsUpDown, Loader2, X } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { nanoid } from "nanoid"
 
 enum SortOrder {
     ASC = "asc",
@@ -40,145 +36,130 @@ enum SortOrder {
 }
 
 interface Field {
-    field: string;
-    label: string;
-    showInList: boolean;
-    sortable: boolean;
-    nestedValue?: string;
-    sortKey?: string;
-}
-
-interface Entity {
-    singular: string;
-    plural: string;
-    mainField?: string;
+    name: string
+    label: string
+    sortable: boolean
+    nestedField?: string
+    sortKey?: string
 }
 
 interface Metadata {
-    fields: Field[];
-    entity: Entity;
+    fields: Field[]
+    singular: string
+    plural: string
+    mainField: string
 }
 
 interface Props {
-    apiUrl: string;
-    module: string;
-    onSelect: (selectedItem: any) => void;
-    defaultOptionId?: string;
-    label?: boolean;
+    module: string
+    onSelect: (selectedItem: ViewRelationListTableOption | null) => void
+    defaultLabel?: string;
+    selectedId?: number
+    label?: boolean
 }
 
 export interface ViewRelationListTableOption {
-    id: string;
-    label: string;
+    id: string
+    label: string
 }
 
-
-export default function ViewRelationListTable({ apiUrl, module, onSelect, defaultOptionId, label }: Props) {
-    const [loading, setLoading] = useState<boolean>(true);
-    const [query, setQuery] = useState<string>("");
-    const [sortColumn, setSortColumn] = useState<string | null>(null);
-    const [sortOrder, setSortOrder] = useState<string | null>(null);
-    const [page, setPage] = useState<number>(0);
-    const [pages, setPages] = useState(0);
-    const [data, setData] = useState([]);
-    const [metadata, setMetadata] = useState<Metadata>();
-    const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
-    const [open, setOpen] = useState<boolean>(false);
-    const [selectedValue, setSelectedValue] = useState<ViewRelationListTableOption | null>(null);
+export default function ViewRelationListTable({
+    module,
+    onSelect,
+    selectedId,
+    defaultLabel,
+    label
+}: Props) {
+    const [loading, setLoading] = useState<boolean>(true)
+    const [query, setQuery] = useState<string>("")
+    const [sortColumn, setSortColumn] = useState<string | null>(null)
+    const [sortOrder, setSortOrder] = useState<string | null>(null)
+    const [page, setPage] = useState<number>(0)
+    const [pages, setPages] = useState(0)
+    const [data, setData] = useState([])
+    const [metadata, setMetadata] = useState<Metadata>()
+    const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set())
+    const [selectedLabel, setSelectedLabel] = useState(defaultLabel || undefined);
+    const [open, setOpen] = useState<boolean>(false)
 
     const toggleColumnVisibility = (column: string) => {
         setHiddenColumns(prev => {
-            const newHidden = new Set(prev);
+            const newHidden = new Set(prev)
             if (newHidden.has(column)) {
-                newHidden.delete(column);
+                newHidden.delete(column)
             } else {
-                newHidden.add(column);
+                newHidden.add(column)
             }
-            return newHidden;
-        });
-    };
+            return newHidden
+        })
+    }
 
     const handleSort = (column: string, order: SortOrder) => {
-        setSortColumn(column);
-        setSortOrder(order);
-    };
+        setSortColumn(column)
+        setSortOrder(order)
+    }
 
     const handleSearch = useDebouncedCallback(async (value: string) => {
-        setQuery(value);
-        setPages(0);
-        setPage(0);
-
-    }, 500);
+        setQuery(value)
+        setPages(0)
+        setPage(0)
+    }, 500)
 
     useEffect(() => {
         const fetchInitData = async () => {
-            setLoading(true);
-            let endpoint = `${apiUrl}/${module}/search?`;
-            if (query !== "") endpoint += `query=${query}&`;
-            if (sortColumn && sortOrder) endpoint += `sort=${sortColumn},${sortOrder}&`;
-            endpoint += `page=${page}&`;
-            const response = await secureFetch(endpoint);
-            setMetadata(response.metadata);
-            setData(response.data.content);
-            setPage(response.data.pageable.pageNumber);
-            setPages(response.data.totalPages);
-
-            if (defaultOptionId) {
-                const response = await secureFetch(`${apiUrl}/${module}/${defaultOptionId}`);
-                if (response.status === 200) {
-                    setSelectedValue({ id: response.data.id, label: getNestedValue(response.data, response.metadata?.entity?.mainField || response.data.id) })
-                }
-            }
-            setLoading(false);
+            setLoading(true)
+            let endpoint = `/${module}/search?`
+            if (query !== "") endpoint += `query=${query}&`
+            if (sortColumn && sortOrder) endpoint += `sort=${sortColumn},${sortOrder}&`
+            endpoint += `page=${page}&`
+            const response = await secureFetch(endpoint)
+            setMetadata(response.metadata)
+            setData(response.data.content)
+            setPage(response.data.pageable.pageNumber)
+            setPages(response.data.totalPages)
+            setLoading(false)
         }
-        fetchInitData();
 
-    }, [apiUrl, module, sortColumn, sortOrder, query, page, pages])
+        fetchInitData()
+    }, [module, sortColumn, sortOrder, query, page, pages])
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <div className="flex flex-1">
                 <SheetTrigger asChild>
-                    {label ?
-                        <Button variant="outline" disabled={loading && !open} className={`${selectedValue ? 'rounded-e-none' : ''}`}>
-                            {(loading && !open) ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircledIcon className='mr-2 h-4 w-4' />}
-                            {metadata?.entity.singular || "Cargando"}
-                            {selectedValue && (
+                    {label ? (
+                        <Button variant="outline" disabled={loading && !open} className={`${selectedId ? "rounded-e-none" : ""}`}>
+                            {loading && !open ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircledIcon className="mr-2 h-4 w-4" />}
+                            {metadata?.singular || "Cargando"}
+                            {selectedId && (
                                 <>
-                                    <Separator orientation='vertical' className='mx-2 h-4' />
+                                    <Separator orientation="vertical" className="mx-2 h-4" />
                                     <div className="space-x-1 lg:flex">
-                                        <Badge
-                                            variant='secondary'
-                                            className='rounded-sm px-1 font-normal'
-                                        >
-                                            {selectedValue?.label || selectedValue.id}
+                                        <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                                            {selectedLabel || selectedId}
                                         </Badge>
                                     </div>
                                 </>
                             )}
                         </Button>
-                        :
+                    ) : (
                         <Button variant="outline" className="w-full justify-between">
-                            {selectedValue ? selectedValue?.label || selectedValue.id : 'Seleccionar...'}
+                            {selectedId ? selectedLabel || selectedId : "Seleccionar..."}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
-                    }
+                    )}
                 </SheetTrigger>
-                {(selectedValue && label) &&
-                    <Button variant="outline" className="rounded-s-none" size="icon" onClick={() => {
-                        setSelectedValue(null)
-                        onSelect(null)
-                    }}>
+                {selectedId && label && (
+                    <Button variant="outline" className="rounded-s-none" size="icon" onClick={() => onSelect(null)}>
                         <X />
                     </Button>
-                }
+                )}
             </div>
+
             <SheetContent side="bottom" className="max-h-[80vh] h-[80vh]">
                 <SheetHeader>
-                    <SheetTitle>Buscar {metadata?.entity.singular}</SheetTitle>
-                    <SheetDescription>
-                        Busca un registro en la lista y haz tu elección. ¡No te quedes mirando!
-                    </SheetDescription>
+                    <SheetTitle>Buscar {metadata?.singular}</SheetTitle>
+                    <SheetDescription>Busca un registro en la lista y haz tu elección.</SheetDescription>
                 </SheetHeader>
 
                 <div className="py-4 flex flex-col sm:flex-row justify-between items-center w-full sm:space-y-0 space-y-4 sm:space-x-4">
@@ -189,16 +170,16 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                             className="w-full pl-9 peer"
                             defaultValue={query}
                             onChange={(e) => {
-                                handleSearch(e.target.value);
+                                handleSearch(e.target.value)
                             }}
                         />
                         <IconSearch className="h-4 w-4 absolute left-0 top-1/2 -translate-y-1/2 ms-2 text-muted-foreground peer-focus:text-gray-800" />
                     </div>
                     <ViewRelationPagination page={page} pages={pages} setPage={setPage} />
-
                 </div>
+
                 <div className="overflow-y-auto max-h-[60vh]">
-                    {loading ?
+                    {loading ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -213,20 +194,22 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                                 {Array.from({ length: 10 }).map((_, index) => (
                                     <TableRow key={index}>
                                         {Array.from({ length: 5 }).map((_, secondIndex) => (
-                                            <TableCell key={`${index}-${secondIndex}`}><Skeleton className="h-4 w-full" /></TableCell>
+                                            <TableCell key={`${index}-${secondIndex}`}>
+                                                <Skeleton className="h-4 w-full" />
+                                            </TableCell>
                                         ))}
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
-                        :
+                    ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     {metadata?.fields
-                                        .filter((field: Field) => field.showInList && !hiddenColumns.has(field.field))
+                                        .filter((field: Field) => !hiddenColumns.has(field.name))
                                         .map((field: Field) => (
-                                            <TableHead key={field.field}>
+                                            <TableHead key={field.name}>
                                                 <div className="flex items-center space-x-2">
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -236,9 +219,9 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                                                                 className="-ml-3 h-8 data-[state=open]:bg-accent text-wrap my-2 py-5"
                                                             >
                                                                 {field.label}
-                                                                {sortColumn === (field.sortKey || field.field) && sortOrder === SortOrder.DESC ? (
+                                                                {sortColumn === (field.sortKey || field.name) && sortOrder === SortOrder.DESC ? (
                                                                     <ArrowDownIcon className="ml-2 h-4 w-4" />
-                                                                ) : sortColumn === (field.sortKey || field.field) && sortOrder === SortOrder.ASC ? (
+                                                                ) : sortColumn === (field.sortKey || field.name) && sortOrder === SortOrder.ASC ? (
                                                                     <ArrowUpIcon className="ml-2 h-4 w-4" />
                                                                 ) : (
                                                                     <CaretSortIcon className="ml-2 h-4 w-4" />
@@ -246,20 +229,20 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="start">
-                                                            {field.sortable &&
-                                                                <React.Fragment>
-                                                                    <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.field, SortOrder.ASC)}>
+                                                            {field.sortable && (
+                                                                <>
+                                                                    <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.name, SortOrder.ASC)}>
                                                                         <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                                                                         Orden Ascendente
                                                                     </DropdownMenuItem>
-                                                                    <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.field, SortOrder.DESC)}>
+                                                                    <DropdownMenuItem onClick={() => handleSort(field.sortKey || field.name, SortOrder.DESC)}>
                                                                         <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                                                                         Orden Descendente
                                                                     </DropdownMenuItem>
                                                                     <DropdownMenuSeparator />
-                                                                </React.Fragment>
-                                                            }
-                                                            <DropdownMenuItem onClick={() => toggleColumnVisibility(field.field)}>
+                                                                </>
+                                                            )}
+                                                            <DropdownMenuItem onClick={() => toggleColumnVisibility(field.name)}>
                                                                 <EyeNoneIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                                                                 Ocultar Columna
                                                             </DropdownMenuItem>
@@ -272,41 +255,41 @@ export default function ViewRelationListTable({ apiUrl, module, onSelect, defaul
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {data.map((item: any) =>
+                                {data.map((item: any) => (
                                     <TableRow key={nanoid()}>
-                                        {metadata?.fields?.filter(field => field.showInList && !hiddenColumns.has(field.field)).map(field => {
-                                            const nestedPath = field.nestedValue || field.field;
-                                            const fieldValue = getNestedValue(item, nestedPath);
+                                        {metadata?.fields?.filter(field => !hiddenColumns.has(field.name)).map(field => {
+                                            const nestedField = field.nestedField || field.name
+                                            const fieldValue = getNestedValue(item, nestedField)
                                             return (
-                                                <TableCell key={`${item.id}-${field.field}`}>
+                                                <TableCell key={`${item.id}-${field.name}`}>
                                                     {fieldValue}
                                                 </TableCell>
                                             )
                                         })}
                                         <TableCell>
-                                            {(selectedValue && selectedValue.id == item.id) ?
-                                                <Button size="sm" disabled>
-                                                    Seleccionado
-                                                </Button>
-                                                :
-                                                <Button size="sm" onClick={() => {
-                                                    setSelectedValue({ id: item.id, label: getNestedValue(item, metadata?.entity.mainField || item.id) })
-                                                    onSelect({ id: item.id, label: getNestedValue(item, metadata?.entity.mainField || item.id) })
-                                                    setOpen(false)
-                                                }}
+                                            {selectedId === item.id ? (
+                                                <Button size="sm" disabled>Seleccionado</Button>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        // const label = getNestedValue(item, metadata?.mainField || item.id)
+                                                        onSelect(item.id)
+                                                        setSelectedLabel(getNestedValue(item, metadata?.mainField || item.id));
+                                                        setOpen(false)
+                                                    }}
                                                 >
                                                     Seleccionar
                                                 </Button>
-                                            }
+                                            )}
                                         </TableCell>
                                     </TableRow>
-                                )}
+                                ))}
                             </TableBody>
-                        </Table >
-                    }
-
+                        </Table>
+                    )}
                 </div>
             </SheetContent>
-        </Sheet >
-    );
+        </Sheet>
+    )
 }
