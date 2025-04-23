@@ -16,7 +16,7 @@ export default function FormRelation<T extends FieldValues>({ className, label, 
     const { setValue, watch, formState: { errors } } = useFormContext<T>();
 
     const selectedValue = watch(name);
-    console.log("selectedValue", name, selectedValue); // ← esto debe mostrarte el valor correcto
+    // console.log("selectedValue", name, selectedValue); 
 
 
     const handleSelect = (selectedItem: any) => {

@@ -59,16 +59,16 @@ const routeMapping: Record<string, BreadcrumbItem[]> = {
 
   '/dashboard/currency': [
     { title: 'Inicio', link: '/currency' },
-    { title: 'Procesos misionales', link: '/dashboard/currency' }
+    { title: 'Divisas', link: '/dashboard/currency' }
   ],
   '/dashboard/currency/edit': [
     { title: 'Inicio', link: '/dashboard' },
-    { title: 'Procesos misionales', link: '/dashboard/currency' },
+    { title: 'Divisas', link: '/dashboard/currency' },
     { title: 'Editar', link: '/dashboard/currency/edit' }
   ],
   '/dashboard/currency/:id': [
     { title: 'Inicio', link: '/dashboard' },
-    { title: 'Procesos misionales', link: '/dashboard/currency' },
+    { title: 'Divisas', link: '/dashboard/currency' },
     { title: 'Detalle', link: '/dashboard/currency/edit' }
   ],
 

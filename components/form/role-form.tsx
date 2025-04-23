@@ -6,67 +6,31 @@ import FormInput from "@/components/ui/form/form-input";
 import { z } from "zod";
 import FormFieldArray from "../ui/form/form-field-array";
 import FormRelation from "../ui/form/form-relation";
-import { secureFetch } from "@/secure-fetch";
 
-export function RoleForm({ apiUrl, module, data }: FormBaseProps) {
+export function RoleForm({ module, data }: FormBaseProps) {
     const schema = z.object({
-        id: z.string().optional(),
         name: z.string(),
-        permissions: z.array(
-            z.object({
-                id: z.string().optional(),
-                permission: z.object({
-                    id: z.string().optional(),
-                }),
-                role: z.object({
-                    id: z.string().optional(),
-                })
-            })
-        ),
+        permissionIds: z.array(z.string()),
     });
 
-    const onSubmit = async (data: z.infer<typeof schema>) => {
-        const response = await secureFetch(`${apiUrl}/${module}${data?.id ? `/${data.id}` : ''}`, {
-            method: data?.id ? 'PATCH' : 'POST',
-            body: JSON.stringify({
-                ...(data?.id ? { id: data.id } : {}),
-                name: data.name
-            })
-        });
-
-        if (response.status === 200) {
-            console.log(data.permissions);
-            for (const rolePermission of data.permissions) {
-                console.log(rolePermission);
-                await secureFetch(`${apiUrl}/rolePermission${rolePermission?.id ? `/${rolePermission.id}` : ''}`, {
-                    method: rolePermission?.id ? 'PATCH' : 'POST',
-                    body: JSON.stringify({
-                        ...(rolePermission.id ? { id: rolePermission.id } : {}),
-                        role: { id: response.data.id },
-                        permission: { id: rolePermission.permission.id }
-                    })
-                });
-            }
-        }
-        return response;
-    }
-
     return (
-        <FormLayout module={module} apiUrl={apiUrl} schema={schema} defaultValues={{ id: data?.id || "", name: data?.name || "", permissions: [] }} onSubmit={(data) => onSubmit(data)}>
+        <FormLayout
+            id={data?.id || undefined}
+            module={module}
+            schema={schema}
+            defaultValues={{
+                name: data?.name || "",
+                permissionIds: data?.permissions?.map((permission: { id: number, name: string }) => permission.id) || []
+            }}>
             <FormInput name="name" label="Nombre del rol" className="col-span-full" />
             <FormFieldArray
-                name="permissions"
+                name="permissionIds"
                 label="Permisos"
                 columns={[]}
-                fetchUrl={data?.id ? `${apiUrl}/rolePermission/search/role/${data?.id}` : undefined}
                 className="col-span-full"
-                defaultItem={{
-                    id: "",
-                    permission: { id: "" },
-                    role: { id: "" },
-                }}
+                defaultItem={{ permission: null }}
                 cells={[
-                    (index) => <FormRelation apiUrl={apiUrl} name={`permissions.${index}.permission`} module="permission" />,
+                    (index) => <FormRelation name={`permissionIds.${index}`} module="permission" />,
                 ]}
             />
         </FormLayout>

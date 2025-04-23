@@ -17,16 +17,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 
 export interface Props {
-    apiUrl: string;
-    module: string;
     projectId: string;
     data: any;
-    files?: any[]; // archivos asociados a esta issue
+    files?: any[];
 }
 
 
-
-export function ProjectIssueForm({ apiUrl, module, data, projectId, files }: Props) {
+export function ProjectIssueForm({  data, projectId, files }: Props) {
     const allowedMimeTypes = [
         "application/pdf",
         "application/msword",
@@ -65,7 +62,7 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId, files }: Pro
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            const response = await secureFetch(`${apiUrl}/projectIssue/${data.id}`);
+            const response = await secureFetch(`/project/${data.id}`);
             form.setValue('id', response.data.id);
             form.setValue('title', response.data.name);
             form.setValue('description', response.data.description);
@@ -76,82 +73,75 @@ export function ProjectIssueForm({ apiUrl, module, data, projectId, files }: Pro
             fetchData();
         }
 
-    }, [apiUrl, data, form])
+    }, [data, form])
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (formData: any) => {
         setLoading(true);
-
-        const response = await secureFetch(`${apiUrl}/projectIssue${data?.id ? `/${data.id}` : ''}`, {
-            method: data?.id ? 'PATCH' : 'POST',
-            body: JSON.stringify({
-                project: { id: projectId },
-                name: data.title,
-                description: data.description
-            })
-        });
-
-        if (response.status !== 200) {
-            if (response.errors) {
-                response.errors.forEach((err: { field: string; message: string }) => {
-                    form.setError(err.field, {
-                        type: "server",
-                        message: err.message
-                    });
-                });
+    
+        try {
+            const dtoPayload = {
+                issues: [{
+                    name: formData.title,
+                    description: formData.description,
+                    fileNames: formData.files?.map((f: File) => f.name) || [],
+                }]
+            };
+    
+            const body = new FormData();
+            body.append("projectDto", JSON.stringify(dtoPayload));
+    
+            if (formData.files && formData.files.length > 0) {
+                for (const file of formData.files) {
+                    body.append("files", file);
+                }
             }
-
-            const errorMessages =
-                response.errors?.map((err: { message: string }) => `• ${err.message}`).join("<br>") ||
-                response.message;
-
+    
+            const response = await secureFetch(`/project/${projectId}/updateWithFiles`, {
+                method: "PATCH",
+                body,
+                disableJsonResponse: true,
+                disableContentType: true,
+            });
+    
+            if (response.status !== 200) {
+                const json = await response.json();
+    
+                toast({
+                    variant: "destructive",
+                    title: "¡Ups!",
+                    description: json.errors?.map((e: any) => `• ${e.message}`).join("<br>") || json.message,
+                    duration: 3000,
+                });
+    
+                setLoading(false);
+                return;
+            }
+    
             toast({
-                variant: "destructive",
-                title: "¡Ups!",
-                description: <div dangerouslySetInnerHTML={{ __html: errorMessages }} />,
+                title: "🎉 ¡Todo listo!",
+                description: "Los cambios han sido guardados correctamente.",
                 duration: 3000
             });
-
+    
+            setSheetOpen(false);
+            router.refresh();
+            router.push(`/dashboard/project/${projectId}`);
+            form.reset();
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error.message,
+            });
+        } finally {
             setLoading(false);
-            return;
-        } else {
-            if (data.files && data.files.length > 0) {
-                for (const file of data.files) {
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    const uploadResponse = await secureFetch(`${apiUrl}/storage/file/${response.data.id}`, {
-                        method: "POST",
-                        body: formData,
-                        disableContentType: true,
-                    });
-
-                    if (uploadResponse.status !== 200) {
-                        toast({
-                            variant: "destructive",
-                            title: "Error al subir archivo",
-                            description: `Archivo: ${file.name} — ${uploadResponse.message}`,
-                        });
-                    }
-                }
-
-            }
         }
-
-        toast({
-            title: "🎉 ¡Todo listo!",
-            description: "Los cambios han sido guardados correctamente.",
-            duration: 3000
-        });
-        setSheetOpen(false);
-        router.refresh();
-        router.push(`/dashboard/project/${projectId}`);
-        form.reset();
-
-        setLoading(false);
-    }
+    };
+    
 
     const handleDownload = async (filename: string) => {
         try {
-            const blob = await secureFetch(`${apiUrl}/storage/file/${filename}`, {
+            const blob = await secureFetch(`/storage/file/${filename}`, {
                 method: "GET",
                 disableContentType: true,
                 disableJsonResponse: true

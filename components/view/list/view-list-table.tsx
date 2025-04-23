@@ -160,8 +160,11 @@ export default function ViewListTable({ config, currentPreferences }: TableProps
                                     {data.map((item: any) =>
                                         <TableRow key={nanoid()}>
                                             {config.fields.filter(field => !hiddenColumns.has(field.name)).map(field => {
-                                                const nestedField = field.nestedField || field.name
-                                                const fieldValue = getNestedValue(item, nestedField)
+                                                // const nestedField = field.nestedField || field.name
+                                                // const fieldValue = getNestedValue(item, nestedField)
+                                                const nestedFieldPath = field.nestedField ? `${field.name}.${field.nestedField}` : field.name;
+                                                const fieldValue = getNestedValue(item, nestedFieldPath);
+
                                                 const redirectPath = field.redirect ? resolveRedirectPath(field.redirect, item) : null;
                                                 return (
                                                     <TableCell key={`${item.id}-${field.name}`}>

@@ -13,8 +13,6 @@ export function DependencyForm({ module, data }: FormBaseProps) {
         leaderId: z.string(),
     });
 
-    console.log(data);
-
     return (
         <FormLayout module={module} schema={schema} defaultValues={{
             name: data?.name || "",

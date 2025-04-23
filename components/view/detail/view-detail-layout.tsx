@@ -61,9 +61,21 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                     </div>
 
                     <div className="flex flex-nowrap">
+                        {
+                            extraActions &&
+                            <div className="pe-2">
+                                {extraActions.map((action, index) => (
+                                    <React.Fragment key={index}>
+                                        {action}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        }
+
                         <Link href={`/dashboard/${module}/edit?id=${response.data.id}`} className={`${buttonVariants({ variant: "default" })} rounded-e-none`}>
                             Editar
                         </Link>
+
                         <Dialog>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -87,11 +99,11 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                                             </DropdownMenuItem>
                                         </DialogTrigger>
 
-                                        {extraActions && extraActions.map((action, index) => (
+                                        {/* {extraActions && extraActions.map((action, index) => (
                                             <React.Fragment key={index}>
                                                 {action}
                                             </React.Fragment>
-                                        ))}
+                                        ))} */}
                                     </DropdownMenuGroup>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -116,26 +128,33 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                     )}
 
                     <div className={`w-full ${imageFields.length > 0 ? 'md:w-4/5' : ''} grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg`}>
-                        {response.metadata.fields.filter((field: FieldMetadata) => field.type !== 'IMAGE' && field.type !== 'ARRAY').map(field => {
-                            const nestedField = field.nestedField || field.name
-                            const fieldValue = getNestedValue(response.data, nestedField)
-                            const redirectPath = field.redirect ? resolveRedirectPath(field.redirect, response.data) : null;
+                        {[...response.metadata.fields]
+                            .filter((field: FieldMetadata) => field.type !== 'IMAGE' && field.type !== 'ARRAY')
+                            .sort((a, b) => a.renderOrder - b.renderOrder)
+                            .map(field => {
+                                // const nestedField = field.nestedField || field.name
+                                // const fieldValue = getNestedValue(response.data, nestedField)
 
-                            return (
-                                <div key={field.name} className={`col-span-1 ${field.expand ? `md:col-span-full` : ''}`}>
-                                    <Label className="font-semibold">{field.label}</Label>
-                                    <div className="rounded-lg px-3 py-2 bg-muted mt-2 break-words whitespace-normal min-h-10">
-                                        {field.type === 'BOOLEAN' ?
-                                            fieldValue ? 'Si' : 'No'
-                                            : redirectPath ? (
-                                                <Link className="text-primary hover:text-opacity-90 hover:underline" href={`/dashboard/${redirectPath}`}>{fieldValue}</Link>
-                                            ) : (
-                                                fieldValue
-                                            )}
+                                const fieldValue = field.nestedField
+                                    ? getNestedValue(response.data[field.name], field.nestedField)
+                                    : getNestedValue(response.data, field.name)
+                                const redirectPath = field.redirect ? resolveRedirectPath(field.redirect, response.data) : null;
+
+                                return (
+                                    <div key={field.name} className={`col-span-1 ${field.expand ? `md:col-span-full` : ''}`}>
+                                        <Label className="font-semibold">{field.label}</Label>
+                                        <div className="rounded-lg px-3 py-2 bg-muted mt-2 break-words whitespace-normal min-h-10">
+                                            {field.type === 'BOOLEAN' ?
+                                                fieldValue ? 'Si' : 'No'
+                                                : redirectPath ? (
+                                                    <Link className="text-primary hover:text-opacity-90 hover:underline" href={`/dashboard/${redirectPath}`}>{fieldValue}</Link>
+                                                ) : (
+                                                    fieldValue
+                                                )}
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
 
                         {arrayFieldsWithMetadata.map((field) => (
                             <div key={field.name} className="col-span-full">

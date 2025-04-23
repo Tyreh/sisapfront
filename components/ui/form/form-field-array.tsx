@@ -2,7 +2,7 @@
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useFormContext, useFieldArray, FieldValues, ArrayPath } from "react-hook-form";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -31,25 +31,13 @@ const FormFieldArray = <T extends FieldValues>({
 }: FieldArrayComponentProps<T>) => {
     const { control, formState: { errors } } = useFormContext<T>();
     const { fields, append, remove } = useFieldArray({ control, name });
-    // const [fieldKeys, setFieldKeys] = useState<string[]>(fields.map(() => nanoid()));
-
-
-    useEffect(() => {
-        append(defaultItem);
-    }, [append, defaultItem]);
-
-    // useEffect(() => {
-    //     setFieldKeys(fields.map(() => nanoid()));
-    // }, [fields, fields.length]);
 
     const handleAppend = () => {
-        append(defaultItem ?? {}); // se utiliza el objeto pasado o un objeto vacío
-        // setFieldKeys(prevKeys => [...prevKeys, nanoid()]);
+        append(defaultItem);
     };
 
     const handleRemove = (index: number) => {
         remove(index);
-        // setFieldKeys(prevKeys => prevKeys.filter((_, i) => i !== index));
     };
 
     return (
@@ -79,8 +67,8 @@ const FormFieldArray = <T extends FieldValues>({
 
                         <TableBody>
                             {fields.map((_, index) => (
-                                // <TableRow key={fieldKeys[index]} className="hover:bg-inherit">
-                                <TableRow key={nanoid()} className="hover:bg-inherit">
+                                // <TableRow key={nanoid()} className="hover:bg-inherit">
+                                <TableRow key={fields[index].id} className="hover:bg-inherit">
                                     {cells.map((cellRenderer, cellIndex) => (
                                         <TableCell key={cellIndex}>
                                             {cellRenderer(index)}

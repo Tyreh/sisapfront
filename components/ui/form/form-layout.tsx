@@ -13,6 +13,7 @@ import { secureFetch } from "@/secure-fetch";
 interface Props<T extends ZodType<any, any>> {
     schema: T;
     defaultValues: zInfer<T>;
+    id?: string;
     module: string;
     onSubmit?: (data: zInfer<T>) => Promise<any>;
     children: React.ReactNode;
@@ -22,6 +23,7 @@ export function FormLayout<T extends ZodType<any, any>>({
     schema,
     defaultValues,
     module,
+    id,
     onSubmit,
     children
 }: Props<T>) {
@@ -37,12 +39,14 @@ export function FormLayout<T extends ZodType<any, any>>({
 
     const onSubmitForm = async (data: zInfer<T>) => {
         setLoading(true);
+        console.log("DATA")
+        console.log(data);
         let response;
         if (onSubmit) {
             response = await onSubmit(data);
         } else {
-            response = await secureFetch(`/${module}${data?.id ? `/${data.id}` : ''}`, {
-                method: data?.id ? 'PATCH' : 'POST',
+            response = await secureFetch(`/${module}${id ? `/${id}` : ''}`, {
+                method: id ? 'PATCH' : 'POST',
                 body: JSON.stringify(data)
             });
         }

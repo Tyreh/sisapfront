@@ -15,12 +15,17 @@ export function StrategicLineForm({ module, data }: FormBaseProps) {
     });
 
     return (
-        <FormLayout module={module} schema={schema} defaultValues={{
-            name: data?.name || "",
-            description: data?.description || "",
-            startYear: data?.startYear || undefined,
-            endYear: data?.endYear || undefined
-        }}>
+        <FormLayout
+            id={data?.id || undefined}
+            module={module}
+            schema={schema}
+            defaultValues={{
+                name: data?.name || "",
+                description: data?.description || "",
+                startYear: data?.startYear || undefined,
+                endYear: data?.endYear || undefined
+            }}
+        >
             <FormInput name="name" label="Nombre" className="col-span-full" />
             <FormInput name="startYear" label="Año de inicio" props={{ type: "number" }} />
             <FormInput name="endYear" label="Año de fin" props={{ type: "number" }} />

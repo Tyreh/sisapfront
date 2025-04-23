@@ -6,7 +6,7 @@ import {
     Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger
 } from "@/components/ui/sheet"
 import {
-    useEffect, useState
+    useEffect, useMemo, useState
 } from "react"
 import React from "react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -79,7 +79,13 @@ export default function ViewRelationListTable({
     const [data, setData] = useState([])
     const [metadata, setMetadata] = useState<Metadata>()
     const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set())
-    const [selectedLabel, setSelectedLabel] = useState(defaultLabel || undefined);
+
+    const selectedLabel = useMemo(() => {
+        if (!selectedId || !metadata) return undefined;
+        const selectedItem = data.find((item: any) => item.id === selectedId);
+        return selectedItem ? getNestedValue(selectedItem, metadata.mainField) : defaultLabel;
+    }, [selectedId, data, metadata, defaultLabel]);
+
     const [open, setOpen] = useState<boolean>(false)
 
     const toggleColumnVisibility = (column: string) => {
@@ -144,7 +150,7 @@ export default function ViewRelationListTable({
                         </Button>
                     ) : (
                         <Button variant="outline" className="w-full justify-between">
-                            {selectedId ? selectedLabel || selectedId : "Seleccionar..."}
+                            {selectedLabel ?? "Seleccionar..."}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                     )}
@@ -273,9 +279,8 @@ export default function ViewRelationListTable({
                                                 <Button
                                                     size="sm"
                                                     onClick={() => {
-                                                        // const label = getNestedValue(item, metadata?.mainField || item.id)
                                                         onSelect(item.id)
-                                                        setSelectedLabel(getNestedValue(item, metadata?.mainField || item.id));
+                                                        // setSelectedLabel(getNestedValue(item, metadata?.mainField || item.id));
                                                         setOpen(false)
                                                     }}
                                                 >

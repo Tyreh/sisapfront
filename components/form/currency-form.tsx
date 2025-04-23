@@ -11,7 +11,12 @@ export function CurrencyForm({ module, data }: FormBaseProps) {
     });
 
     return (
-        <FormLayout module={module} schema={schema} defaultValues={{ name: data?.name || "" }}>
+        <FormLayout
+            id={data?.id || undefined}
+            module={module}
+            schema={schema}
+            defaultValues={{ name: data?.name || "" }}
+        >
             <FormInput name="name" label="Nombre de la divisa" className="col-span-full" />
         </FormLayout>
     )
