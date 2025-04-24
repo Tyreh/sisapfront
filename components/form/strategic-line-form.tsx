@@ -7,12 +7,46 @@ import { z } from "zod";
 import FormTextArea from "../ui/form/form-text-area";
 
 export function StrategicLineForm({ module, data }: FormBaseProps) {
-    const schema = z.object({
-        name: z.string(),
-        startYear: z.string().transform((val) => Number(val)).or(z.number()),
-        endYear: z.string().transform((val) => Number(val)).or(z.number()),
-        description: z.string(),
-    });
+    const schema = z
+        .object({
+            name: z.string(),
+            startYear: z.preprocess(
+                (val) => {
+                    if (typeof val === "string" && val.trim() !== "") {
+                        const parsed = parseInt(val, 10);
+                        return isNaN(parsed) ? val : parsed;
+                    }
+                    return val;
+                },
+                z
+                    .number()
+                    .int()
+                    .min(2000, { message: "El año debe ser mínimo 2000" })
+                    .max(3000, { message: "El año debe ser máximo 3000" })
+            ),
+            endYear: z.preprocess(
+                (val) => {
+                    if (typeof val === "string" && val.trim() !== "") {
+                        const parsed = parseInt(val, 10);
+                        return isNaN(parsed) ? val : parsed;
+                    }
+                    return val;
+                },
+                z
+                    .number()
+                    .int()
+                    .min(2000, { message: "El año debe ser mínimo 2000" })
+                    .max(3000, { message: "El año debe ser máximo 3000" })
+            ),
+            description: z.string(),
+        })
+        .refine(
+            (data) => data.startYear < data.endYear,
+            {
+                message: "El año de inicio debe ser menor que el año de fin",
+                path: ["endYear"],
+            }
+        );
 
     return (
         <FormLayout

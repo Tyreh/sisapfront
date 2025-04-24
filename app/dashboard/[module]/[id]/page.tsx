@@ -3,8 +3,9 @@ import { secureFetch } from "@/secure-fetch";
 import { redirect } from "next/navigation";
 import React from "react";
 import { Separator } from "@/components/ui/separator";
-import { ProjectIssueForm } from "@/components/form/project-issue-form";
-import { Button } from "@/components/ui/button";
+import { ProjectIssueForm } from "@/components/form/project-issue-form2";
+import { Button, buttonVariants } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function Page(props: { params: Promise<{ module: string; id: string }> }) {
     const params = await props.params;
@@ -35,15 +36,14 @@ export default async function Page(props: { params: Promise<{ module: string; id
         redirect("/dashboard");
     }
 
-    console.log(response);
-
     const extraActions = [
-        <ProjectIssueForm
-            key="issueForm"
-            data={null}
-            projectId={response.data.id}
-            files={[]}
-        />,
+        <Link className={buttonVariants({ variant: "default" })} key="addIssue" href={`/dashboard/project/issue/${id}`}>Cargar Avances</Link>
+        // <ProjectIssueForm
+        //     key="issueForm" 
+        //     data={null}
+        //     projectId={response.data.id}
+        //     files={[]}
+        // />,
     ];
 
     return (

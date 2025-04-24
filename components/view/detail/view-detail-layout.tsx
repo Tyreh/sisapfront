@@ -16,6 +16,10 @@ import DeleteAction from "@/components/view/delete-action";
 import PageContainer from "@/components/layout/page-container";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AuditLog from "@/app/dashboard/[module]/[id]/audit-log";
+import { secureFetch } from "@/secure-fetch";
+import { toast } from "@/hooks/use-toast";
+import { ViewDetailFileType } from "./view-detail-file-type";
+import { ViewDetailSingleFileType } from "./ViewDetailSingleFileType";
 
 interface Props {
     module: string;
@@ -51,6 +55,7 @@ export default function ViewDetailLayout({ module, response, extraActions, child
             ...field,
             data: response.data[field.name],
         }));
+
 
     return (
         <PageContainer>
@@ -161,13 +166,12 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                                 <Label className="font-semibold">{field.label}</Label>
                                 <div className="rounded-lg border mt-2">
                                     <Table>
-                                        {/* Tabla con metadata */}
                                         {field.metadata?.fields?.length > 0 ? (
                                             <>
                                                 <TableHeader>
                                                     <TableRow>
-                                                        {field.metadata.fields.map((subField, index) => (
-                                                            <TableHead key={index}>{subField.label}</TableHead>
+                                                        {field.metadata.fields.map((subField, idx) => (
+                                                            <TableHead key={idx}>{subField.label}</TableHead>
                                                         ))}
                                                     </TableRow>
                                                 </TableHeader>
@@ -176,21 +180,53 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                                                         field.data.map((item: any, rowIndex: number) => (
                                                             <TableRow key={rowIndex}>
                                                                 {field.metadata.fields.map((subField) => {
-                                                                    const fieldValue = getNestedValue(item, subField.name);
+                                                                    const value = getNestedValue(item, subField.name);
+
+                                                                    // Si es un array de objetos (=> archivos)
+                                                                    if (
+                                                                        Array.isArray(value) &&
+                                                                        value.length > 0 &&
+                                                                        typeof value[0] === "object"
+                                                                    ) {
+                                                                        return (
+                                                                            <TableCell
+                                                                                key={`${rowIndex}-${subField.name}`}
+                                                                            >
+                                                                                <ViewDetailFileType
+                                                                                    files={value}
+                                                                                />
+                                                                            </TableCell>
+                                                                        );
+                                                                    }
+
+                                                                    // Campo plano FILE
+                                                                    if (subField.type === "FILE") {
+                                                                        return (
+                                                                            <TableCell
+                                                                                key={`${rowIndex}-${subField.name}`}
+                                                                            >
+                                                                                <ViewDetailSingleFileType fileName={String(value ?? "")} />
+                                                                            </TableCell>
+                                                                        );
+                                                                    }
+
+                                                                    // Resto de campos
                                                                     const redirectPath = field.redirect
                                                                         ? resolveRedirectPath(field.redirect, item)
                                                                         : null;
                                                                     return (
-                                                                        <TableCell key={`${rowIndex}-${subField.name}`}>
+                                                                        <TableCell
+                                                                            key={`${rowIndex}-${subField.name}`}
+                                                                        >
                                                                             {redirectPath ? (
                                                                                 <Link
                                                                                     className="text-primary hover:text-opacity-90 hover:underline"
                                                                                     href={`/dashboard${redirectPath}`}
                                                                                 >
-                                                                                    {fieldValue}
+                                                                                    {value}
                                                                                 </Link>
                                                                             ) : (
-                                                                                fieldValue
+                                                                                String(value ?? "")
                                                                             )}
                                                                         </TableCell>
                                                                     );
@@ -210,11 +246,10 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                                                 </TableBody>
                                             </>
                                         ) : (
-                                            // Tabla simple sin metadata
                                             <TableBody>
                                                 {field.data.length > 0 ? (
-                                                    field.data.map((value: any, index: number) => (
-                                                        <TableRow key={index}>
+                                                    field.data.map((value: any, idx: number) => (
+                                                        <TableRow key={idx}>
                                                             <TableCell>{String(value)}</TableCell>
                                                         </TableRow>
                                                     ))
@@ -231,6 +266,9 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                                 </div>
                             </div>
                         ))}
+
+
+
 
                         {children}
                     </div>

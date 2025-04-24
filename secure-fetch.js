@@ -1,25 +1,36 @@
-'use server'
+"use server";
 
 import { cookies } from "next/headers";
 
 export async function secureFetch(url, options = {}) {
+  // Extraemos las opciones específicas y el resto
+  const { disableContentType, disableJsonResponse, headers = {}, ...rest } = options;
+
+  // Recuperamos el token de las cookies
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
-  const disableContentType = options?.disableContentType === true;
 
-  const response = await fetch(`${process.env.API_URL}${url}`, {
-    ...options,
+  // Ejecutamos fetch contra tu API
+  const res = await fetch(`${process.env.API_URL}${url}`, {
+    ...rest,
     headers: {
-      ...(options.headers || {}),
-      "Authorization": `Bearer ${accessToken}`,
+      ...headers,
+      Authorization: `Bearer ${accessToken}`,
+      // Solo añadimos Content-Type si no lo deshabilitas
       ...(disableContentType ? {} : { "Content-Type": "application/json" }),
     },
     credentials: "include",
   });
 
-  // if (!response.ok) {
-  //   throw new Error(`Error ${response.status}`);
-  // }
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
 
-    return await response.json();
+  // Si pediste blob, lo devolvemos
+  if (disableJsonResponse) {
+    return res.blob();
+  }
+
+  // Por defecto, devolvemos JSON
+  return res.json();
 }

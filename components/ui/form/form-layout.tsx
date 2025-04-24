@@ -39,8 +39,6 @@ export function FormLayout<T extends ZodType<any, any>>({
 
     const onSubmitForm = async (data: zInfer<T>) => {
         setLoading(true);
-        console.log("DATA")
-        console.log(data);
         let response;
         if (onSubmit) {
             response = await onSubmit(data);

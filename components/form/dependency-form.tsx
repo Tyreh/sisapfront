@@ -10,18 +10,18 @@ export function DependencyForm({ module, data }: FormBaseProps) {
     const schema = z.object({
         name: z.string(),
         relatedDependencyId: z.string(),
-        leaderId: z.string(),
+        dependencyLeader: z.string(),
     });
 
     return (
         <FormLayout module={module} schema={schema} defaultValues={{
             name: data?.name || "",
             relatedDependencyId: data?.relatedDependency?.id || "",
-            leaderId: data?.leader?.id || "",
+            dependencyLeader: data?.dependencyLeader || "",
         }}>
             <FormInput name="name" label="Nombre de la dependencia" className="col-span-full" />
             <FormRelation name="relatedDependencyId" label="Dependencia asociada" module="dependency" defaultLabel={data?.relatedDependency?.name || undefined} />
-            <FormRelation name="leaderId" label="Líder" module="apiUser" defaultLabel={data?.leader?.fullName || undefined} />
+            <FormInput name="dependencyLeader" label="Líder de la dependencia" />
         </FormLayout>
     )
 }

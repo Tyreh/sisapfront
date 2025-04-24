@@ -7,14 +7,14 @@ import Reminder from "./reminder/reminder";
 import Link from "next/link";
 
 interface CurrentUserData {
-    id: string;
-    username: string;
-    dependency: string;
-    fullName: string;
-    lastLogin: string;
-    lastPasswordDate: string;
-    lastPasswordModified: string;
-    initials: string;
+  id: string;
+  username: string;
+  dependency: string;
+  fullName: string;
+  lastLogin: string;
+  lastPasswordDate: string;
+  lastPasswordModified: string;
+  initials: string;
 }
 
 interface Project {
@@ -141,17 +141,20 @@ export default async function Page() {
             <h2 className="text-2xl font-bold mb-6 text-roble">Tus Proyectos</h2>
           </div>
 
-          {projectData.data.map((project: Project, index: number) =>
-            <Card key={index} className="col-span-full lg:col-span-1">
-              <CardHeader className='flex flex-row items-center justify-center space-y-0 pb-2'>
-                <CardTitle className='text-md font-semibold'><Link href={`/project/${project.id}`}>{project.name}</Link></CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className='text-sm text-center'>{project.finished ? 'Completado' : 'En Ejecución'}</div>
-              </CardContent>
-            </Card>
-
-          )}
+          <div className="flex flex-wrap col-span-full space-x-0 sm:space-x-4">
+            {projectData.data.map((project: Project, index: number) =>
+              <div key={index} className="w-full md:w-1/3 flex flex-col flex-grow flex-shrink pb-4">
+                <Card>
+                  <CardHeader className='flex flex-row items-center justify-center space-y-0 pb-2'>
+                    <CardTitle className='text-md font-semibold'><Link href={`/dashboard/project/${project.id}`}>{project.name}</Link></CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='text-sm text-center'>{project.finished ? 'Completado' : 'En Ejecución'}</div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
 
           <Card className="col-span-full">
             <CardHeader className='flex flex-row items-center justify-center space-y-0 pb-2'>

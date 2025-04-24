@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "secure-fetch.js"
-, "middleware.ts"  ],
+, "middleware.ts", "components/form/project-issue-form.tsx"  ],
   "exclude": [
     "node_modules"
   ]
