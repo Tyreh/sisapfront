@@ -51,7 +51,7 @@ export default function HeaderComponent() {
       }
     }
 
-    function check(e) {
+    function check(e: any) {
       const target = e.target;
       if (!checkParent(target, navMenuDiv)) {
         if (checkParent(target, navMenu)) {
@@ -62,7 +62,7 @@ export default function HeaderComponent() {
       }
     }
 
-    function checkParent(t, elm) {
+    function checkParent(t: any, elm: any) {
       while (t.parentNode) {
         if (t === elm) return true;
         t = t.parentNode;

@@ -41,11 +41,11 @@ export interface ViewConfigDefinition {
     fields: ViewConfigField[];
 }
 
-const usePreferences = (defaultPreferences) => {
+const usePreferences = (defaultPreferences: any) => {
     const [preferences, setPreferences] = useState(defaultPreferences);
 
-    const updatePreference = (key, value) => {
-        setPreferences((prev) => {
+    const updatePreference = (key: any, value: any) => {
+        setPreferences((prev: any) => {
             const updatedPreferences = { ...prev };
 
             if (value === "" || value === null || value === undefined) {
@@ -108,14 +108,11 @@ export default function ViewListTable({ config, currentPreferences }: TableProps
     return (
         <div className='flex flex-1 flex-col space-y-4'>
             <ViewListTableFilters
-                filters={filters}
-                setFilters={setFilters}
                 moduleName={config.module}
                 query={query}
                 setQuery={setQuery}
                 setPage={setPage}
                 updatePreference={updatePreference}
-                filterEndpoints={config?.entity?.filters}
             />
 
             <div className='relative flex flex-1'>

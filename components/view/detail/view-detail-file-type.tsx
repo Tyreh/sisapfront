@@ -2,7 +2,6 @@
 import { toast } from "@/hooks/use-toast";
 import { secureFetch } from "@/secure-fetch";
 import React, { useState } from "react";
-import { boolean } from "zod";
 
 interface Props {
     files: { id: string; fileName: string }[];

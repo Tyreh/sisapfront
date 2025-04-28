@@ -170,7 +170,7 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                                             <>
                                                 <TableHeader>
                                                     <TableRow>
-                                                        {field.metadata.fields.map((subField, idx) => (
+                                                        {field.metadata.fields.map((subField: any, idx: any) => (
                                                             <TableHead key={idx}>{subField.label}</TableHead>
                                                         ))}
                                                     </TableRow>
@@ -179,7 +179,7 @@ export default function ViewDetailLayout({ module, response, extraActions, child
                                                     {field.data.length > 0 ? (
                                                         field.data.map((item: any, rowIndex: number) => (
                                                             <TableRow key={rowIndex}>
-                                                                {field.metadata.fields.map((subField) => {
+                                                                {field.metadata.fields.map((subField: any) => {
                                                                     const value = getNestedValue(item, subField.name);
 
                                                                     // Si es un array de objetos (=> archivos)

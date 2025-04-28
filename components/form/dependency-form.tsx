@@ -8,9 +8,12 @@ import { z } from "zod";
 
 export function DependencyForm({ module, data }: FormBaseProps) {
     const schema = z.object({
-        name: z.string(),
+        name: z.string()
+            .min(1, "Este campo es obligatorio")
+            .max(80, "Este campo no puede exceder los 80 caracteres"),
         relatedDependencyId: z.string(),
-        dependencyLeader: z.string(),
+        dependencyLeader: z.string()
+            .max(80, "Este campo no puede exceder los 80 caracteres"),
     });
 
     return (

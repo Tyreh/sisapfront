@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { FormLayout } from "../ui/form/form-layout";
 import FormTextArea from "../ui/form/form-text-area";
-import FormFileInput from "../ui/form/form-file-input";
 import React from "react";
 import FormInput from "@/components/ui/form/form-input";
 import { secureFetch } from "@/secure-fetch";
@@ -17,7 +16,7 @@ export function ProjectIssueForm({ projectId }: Props) {
     const schema = z.object({
         name: z.string().min(1, { message: "El nombre es obligatorio" }),
         description: z.string().min(1, { message: "La descripción es obligatoria" }),
-        files: z.array(z.any()).optional() // validaremos después si es necesario
+        files: z.array(z.any()).optional()
     });
 
     const onSubmit = async (values: z.infer<typeof schema>) => {

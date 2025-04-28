@@ -2,9 +2,7 @@ import ViewDetailLayout from "@/components/view/detail/view-detail-layout";
 import { secureFetch } from "@/secure-fetch";
 import { redirect } from "next/navigation";
 import React from "react";
-import { Separator } from "@/components/ui/separator";
-import { ProjectIssueForm } from "@/components/form/project-issue-form2";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 
 export default async function Page(props: { params: Promise<{ module: string; id: string }> }) {

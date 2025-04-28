@@ -12,7 +12,6 @@ import {
     DialogFooter
 } from "@/components/ui/dialog"
 import { Form } from "@/components/ui/form";
-import FormTextArea from "@/components/ui/form/form-text-area2";
 import { secureFetch } from "@/secure-fetch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pen, Plus } from "lucide-react";
@@ -22,6 +21,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton";
+import FormTextArea from "@/components/ui/form/form-text-area";
 
 const formSchema = z.object({
     content: z.string({ required_error: "Este campo es obligatorio" }).min(1, "Este campo es obligatorio")
@@ -105,7 +105,7 @@ export default function ReminderForm({  id }: Props) {
                             {loadingData ?
                                 <Skeleton className="h-20 w-full" />
                                 :
-                                <FormTextArea name="content" label="Contenido" control={form.control} props={{ disabled: loading }} />
+                                <FormTextArea name="content" label="Contenido" props={{ disabled: loading }} />
                             }
                         </div>
                         <DialogFooter>

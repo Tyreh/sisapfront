@@ -9,9 +9,6 @@ export async function middleware(request: NextRequest) {
     const refreshToken = request.cookies.get("refreshToken")?.value;
     const accessToken = request.cookies.get("accessToken")?.value;
 
-
-
-
     if (refreshToken || request.nextUrl.pathname.startsWith('/auth')) {
         try {
             await fetch(`${process.env.API_URL}/auth/checkApiStatus`);

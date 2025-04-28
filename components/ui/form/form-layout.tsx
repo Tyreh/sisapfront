@@ -9,6 +9,8 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodType, infer as zInfer } from "zod";
 import { secureFetch } from "@/secure-fetch";
+import type { Path } from "react-hook-form";
+
 
 interface Props<T extends ZodType<any, any>> {
     schema: T;
@@ -52,7 +54,7 @@ export function FormLayout<T extends ZodType<any, any>>({
         if (response.status !== 200) {
             if (response.errors) {
                 response.errors.forEach((err: { field: string; message: string }) => {
-                    form.setError(err.field, {
+                    form.setError(err.field as Path<zInfer<T>>, {
                         type: "server",
                         message: err.message
                     });

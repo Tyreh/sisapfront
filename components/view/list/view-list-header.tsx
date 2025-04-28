@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { TableHead, TableHeader, TableRow } from "@/components/ui/sticky-table";
 import { EyeNoneIcon, CaretSortIcon } from "@radix-ui/react-icons";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
 interface Props {
     fields: {
@@ -18,7 +18,7 @@ interface Props {
     setSortOrder: (order: string) => void;
     setSortColumn: (column: string) => void;
     hiddenColumns: Set<string>;
-    setHiddenColumns: (columns: Set<string>) => void;
+    setHiddenColumns: Dispatch<SetStateAction<Set<string>>>;
     updatePreference: (key: string, value: any) => void;
     module: string;
 }
@@ -40,16 +40,12 @@ export default function ViewListHeader({ fields, setSortColumn, setSortOrder, so
 
     const toggleColumnVisibility = (column: string) => {
         setHiddenColumns(prev => {
-            const newHidden = new Set(prev);
-            if (newHidden.has(column)) {
-                newHidden.delete(column);
-            } else {
-                newHidden.add(column);
-            }
-            return newHidden;
+          const newHidden = new Set(prev);
+          if (newHidden.has(column)) newHidden.delete(column);
+          else newHidden.add(column);
+          return newHidden;
         });
-    };
-    
+      };
 
     return (
         <TableHeader>

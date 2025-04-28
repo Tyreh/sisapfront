@@ -1,4 +1,5 @@
-import { BadgeDollarSign, Boxes, UserRound, IdCard, FileText, Globe, BringToFront, Building2, LayoutDashboard, Ungroup, UsersRound, Warehouse, ContactRound, CircleDollarSign, LockKeyhole, Key } from 'lucide-react';
+import { Boxes, UserRound, IdCard, FileText, Globe, BringToFront, Building2, LayoutDashboard, Ungroup, Key } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 export interface NavItem {
   title: string;
@@ -6,7 +7,7 @@ export interface NavItem {
   disabled?: boolean;
   external?: boolean;
   shortcut?: [string, string];
-  icon?: React.ElementType;
+  icon: LucideIcon;
   label?: string;
   description?: string;
   isActive?: boolean;
